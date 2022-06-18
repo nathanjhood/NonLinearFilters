@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<JUCERPROJECT id="N7bBzu" name="FirstOrderNonLinearFilter" projectType="audioplug"
+              useAppConfig="0" addUsingNamespaceToJuceHeader="0" displaySplashScreen="1"
+              jucerFormatVersion="1" version="0.0.1b" companyName="StoneyDSP"
+              companyEmail="nathan@stoneydsp.com" pluginFormats="buildVST3"
+              pluginAUMainType="'aufx'" cppLanguageStandard="latest">
+  <MAINGROUP id="SHmbVt" name="FirstOrderNonLinearFilter">
+    <GROUP id="{F1BDC219-E558-D232-9C8F-A4BCDB440DF2}" name="Source">
+      <GROUP id="{6576E0B9-F1B7-695E-0990-4AF1E735EE52}" name="Components">
+        <FILE id="IiUC1X" name="AutoComponent.cpp" compile="1" resource="0"
+              file="Source/AutoComponent.cpp"/>
+        <FILE id="WwYxA6" name="AutoComponent.h" compile="0" resource="0" file="Source/AutoComponent.h"/>
+      </GROUP>
+      <GROUP id="{4AB68A3A-639D-DF1B-5E9A-0D19271C8BA6}" name="Modules">
+        <FILE id="ps3h2D" name="FirstOrderNLfilter.cpp" compile="1" resource="0"
+              file="Source/FirstOrderNLfilter.cpp"/>
+        <FILE id="jXvN54" name="FirstOrderNLfilter.h" compile="0" resource="0"
+              file="Source/FirstOrderNLfilter.h"/>
+      </GROUP>
+      <FILE id="jf2xph" name="PluginParameters.cpp" compile="1" resource="0"
+            file="Source/PluginParameters.cpp"/>
+      <FILE id="DKCjyY" name="PluginParameters.h" compile="0" resource="0"
+            file="Source/PluginParameters.h"/>
+      <FILE id="CtQX0l" name="PluginProcessor.cpp" compile="1" resource="0"
+            file="Source/PluginProcessor.cpp"/>
+      <FILE id="Cy7ov1" name="PluginProcessor.h" compile="0" resource="0"
+            file="Source/PluginProcessor.h"/>
+      <FILE id="FxcSeh" name="PluginEditor.cpp" compile="1" resource="0"
+            file="Source/PluginEditor.cpp"/>
+      <FILE id="FL76jI" name="PluginEditor.h" compile="0" resource="0" file="Source/PluginEditor.h"/>
+      <FILE id="ZTcD0O" name="PluginWrapper.cpp" compile="1" resource="0"
+            file="Source/PluginWrapper.cpp"/>
+      <FILE id="HG8biX" name="PluginWrapper.h" compile="0" resource="0" file="Source/PluginWrapper.h"/>
+    </GROUP>
+  </MAINGROUP>
+  <JUCEOPTIONS JUCE_STRICT_REFCOUNTEDPOINTER="1" JUCE_VST3_CAN_REPLACE_VST2="0"/>
+  <EXPORTFORMATS>
+    <VS2022 targetFolder="Builds/VisualStudio2022">
+      <CONFIGURATIONS>
+        <CONFIGURATION isDebug="1" name="Debug" targetName="FirstOrderNonLinearFilter"
+                       enablePluginBinaryCopyStep="1" vst3BinaryLocation="C:\Program Files\Common Files\VST3\StoneyDSP"/>
+        <CONFIGURATION isDebug="0" name="Release" targetName="FirstOrderNonLinearFilter"
+                       enablePluginBinaryCopyStep="1" vst3BinaryLocation="C:\Program Files\Common Files\VST3\StoneyDSP"/>
+      </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_audio_basics" path="../../../Users/Nathan/DSP/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_devices" path="../../../Users/Nathan/DSP/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_formats" path="../../../Users/Nathan/DSP/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_plugin_client" path="../../../Users/Nathan/DSP/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_processors" path="../../../Users/Nathan/DSP/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_utils" path="../../../Users/Nathan/DSP/JUCE/modules"/>
+        <MODULEPATH id="juce_core" path="../../../Users/Nathan/DSP/JUCE/modules"/>
+        <MODULEPATH id="juce_data_structures" path="../../../Users/Nathan/DSP/JUCE/modules"/>
+        <MODULEPATH id="juce_dsp" path="../../../Users/Nathan/DSP/JUCE/modules"/>
+        <MODULEPATH id="juce_events" path="../../../Users/Nathan/DSP/JUCE/modules"/>
+        <MODULEPATH id="juce_graphics" path="../../../Users/Nathan/DSP/JUCE/modules"/>
+        <MODULEPATH id="juce_gui_basics" path="../../../Users/Nathan/DSP/JUCE/modules"/>
+        <MODULEPATH id="juce_gui_extra" path="../../../Users/Nathan/DSP/JUCE/modules"/>
+        <MODULEPATH id="juce_opengl" path="../../../Users/Nathan/DSP/JUCE/modules"/>
+      </MODULEPATHS>
+    </VS2022>
+  </EXPORTFORMATS>
+  <MODULES>
+    <MODULE id="juce_audio_basics" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_audio_devices" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_audio_formats" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_audio_plugin_client" showAllCode="1" useLocalCopy="0"
+            useGlobalPath="1"/>
+    <MODULE id="juce_audio_processors" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_audio_utils" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_core" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_data_structures" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_dsp" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_events" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_graphics" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_gui_basics" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_gui_extra" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_opengl" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+  </MODULES>
+</JUCERPROJECT>
