@@ -27,24 +27,24 @@ AutoComponentLookAndFeel::AutoComponentLookAndFeel()
     //LookAndFeel_V4::getMidnightColourScheme();*/
 
     ///* Knob style */
-    setColour(juce::Slider::rotarySliderOutlineColourId, juce::Colours::darkgrey);
-    setColour(juce::Slider::rotarySliderFillColourId, juce::Colours::lightslategrey);
+    setColour(juce::Slider::rotarySliderOutlineColourId, juce::Colours::lightslategrey);
+    setColour(juce::Slider::rotarySliderFillColourId, juce::Colours::darkgrey);
     setColour(juce::Slider::backgroundColourId, juce::Colours::green);
-    setColour(juce::Slider::thumbColourId, juce::Colours::hotpink);
+    setColour(juce::Slider::thumbColourId, juce::Colours::wheat);
     setColour(juce::Slider::trackColourId, juce::Colours::black);
     setColour(juce::Slider::textBoxTextColourId, juce::Colours::white);
     setColour(juce::Slider::textBoxBackgroundColourId, juce::Colours::darkgrey);
-    setColour(juce::Slider::textBoxHighlightColourId, juce::Colours::hotpink);
+    setColour(juce::Slider::textBoxHighlightColourId, juce::Colours::wheat);
     setColour(juce::Slider::textBoxOutlineColourId, juce::Colours::lightgrey);
 
     //* Button style */
-    setColour(juce::Button::buttonDown, juce::Colours::orangered);
+    setColour(juce::Button::buttonDown, juce::Colours::wheat);
     setColour(juce::Button::buttonNormal, juce::Colours::darkgrey);
     setColour(juce::Button::buttonOver, juce::Colours::lightslategrey);
 
     ///* Text Button style */
     //setColour(TextButton::buttonColourId, juce::Colours::grey);
-    setColour(juce::TextButton::buttonOnColourId, juce::Colours::hotpink);
+    setColour(juce::TextButton::buttonOnColourId, juce::Colours::wheat);
     setColour(juce::TextButton::buttonNormal, juce::Colours::darkgrey);
     setColour(juce::TextButton::buttonOver, juce::Colours::lightslategrey);
     //setColour(TextButton::buttonDown, juce::Colours::green);
