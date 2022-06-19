@@ -25,8 +25,11 @@ FirstOrderNonLinearFilterAudioProcessorEditor::FirstOrderNonLinearFilterAudioPro
     addAndMakeVisible(redoButton);
     undoButton.onClick = [this] { undoManager.undo(); };
     redoButton.onClick = [this] { undoManager.redo(); };
+    undoButton.setColour(juce::ArrowButton::buttonNormal, juce::Colours::darkgrey);
+    undoButton.setColour(juce::ArrowButton::buttonOver, juce::Colours::lightslategrey);
+    undoButton.setColour(juce::ArrowButton::buttonDown, juce::Colours::wheat);
     setResizable(true, true);
-    setSize(650, 300);
+    setSize(400, 350);
 
     startTimerHz(60);
 }
@@ -43,10 +46,10 @@ void FirstOrderNonLinearFilterAudioProcessorEditor::timerCallback()
 void FirstOrderNonLinearFilterAudioProcessorEditor::paint (juce::Graphics& g)
 {
     // (Our component is opaque, so we must completely fill the background with a solid colour)
-    g.fillAll(juce::Colours::darkslateblue);
+    g.fillAll(juce::Colours::cornflowerblue);
 
     //// draw an outline around the component
-    g.setColour(juce::Colours::black);
+    g.setColour(juce::Colours::darkslategrey);
     g.drawRect(getLocalBounds(), 2);
 
     // Add project info text to background here
