@@ -1,6 +1,7 @@
 # Non-Linear Filters
 
-+ coming soon!
++ Initial implementation of non-linear 1st order filter is up and ready to go...
++ Many more coming soon!
 
 ...stay tuned for more!
 
