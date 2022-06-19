@@ -7,16 +7,16 @@
               pluginAUMainType="'aufx'" cppLanguageStandard="latest">
   <MAINGROUP id="SHmbVt" name="FirstOrderNonLinearFilter">
     <GROUP id="{F1BDC219-E558-D232-9C8F-A4BCDB440DF2}" name="Source">
-      <GROUP id="{6576E0B9-F1B7-695E-0990-4AF1E735EE52}" name="Components">
-        <FILE id="IiUC1X" name="AutoComponent.cpp" compile="1" resource="0"
-              file="Source/AutoComponent.cpp"/>
-        <FILE id="WwYxA6" name="AutoComponent.h" compile="0" resource="0" file="Source/AutoComponent.h"/>
+      <GROUP id="{E5213A0A-5FC1-4072-696D-1A53A6244D76}" name="Components">
+        <FILE id="XfMKk9" name="AutoComponent.cpp" compile="1" resource="0"
+              file="Source/Components/AutoComponent.cpp"/>
+        <FILE id="ryljnD" name="AutoComponent.h" compile="0" resource="0" file="Source/Components/AutoComponent.h"/>
       </GROUP>
-      <GROUP id="{4AB68A3A-639D-DF1B-5E9A-0D19271C8BA6}" name="Modules">
-        <FILE id="ps3h2D" name="FirstOrderNLfilter.cpp" compile="1" resource="0"
-              file="Source/FirstOrderNLfilter.cpp"/>
-        <FILE id="jXvN54" name="FirstOrderNLfilter.h" compile="0" resource="0"
-              file="Source/FirstOrderNLfilter.h"/>
+      <GROUP id="{64B4936B-5C42-6FC9-8FD2-BDC7E66DFE2E}" name="Modules">
+        <FILE id="oyE85v" name="FirstOrderNLfilter.cpp" compile="1" resource="0"
+              file="Source/Modules/FirstOrderNLfilter.cpp"/>
+        <FILE id="uZf2nP" name="FirstOrderNLfilter.h" compile="0" resource="0"
+              file="Source/Modules/FirstOrderNLfilter.h"/>
       </GROUP>
       <FILE id="jf2xph" name="PluginParameters.cpp" compile="1" resource="0"
             file="Source/PluginParameters.cpp"/>

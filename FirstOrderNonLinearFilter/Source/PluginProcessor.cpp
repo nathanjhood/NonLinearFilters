@@ -11,21 +11,71 @@
 
 //==============================================================================
 FirstOrderNonLinearFilterAudioProcessor::FirstOrderNonLinearFilterAudioProcessor()
-#ifndef JucePlugin_PreferredChannelConfigurations
      : AudioProcessor (BusesProperties()
-                     #if ! JucePlugin_IsMidiEffect
-                      #if ! JucePlugin_IsSynth
                        .withInput  ("Input",  juce::AudioChannelSet::stereo(), true)
-                      #endif
                        .withOutput ("Output", juce::AudioChannelSet::stereo(), true)
-                     #endif
-                       )
-#endif
+                       ),
+    apvts(*this, &undoManager, "Parameters", createParameterLayout()),
+    spec(),
+    parameters(*this, getAPVTS()),
+    processorFloat(*this, getAPVTS(), getSpec()),
+    processorDouble(*this, getAPVTS(), getSpec())
 {
 }
 
 FirstOrderNonLinearFilterAudioProcessor::~FirstOrderNonLinearFilterAudioProcessor()
 {
+}
+
+//==============================================================================
+juce::AudioProcessorParameter* FirstOrderNonLinearFilterAudioProcessor::getBypassParameter() const
+{
+    return bypassState;
+}
+
+bool FirstOrderNonLinearFilterAudioProcessor::isBypassed() const noexcept
+{
+    return bypassState->get() == true;
+}
+
+void FirstOrderNonLinearFilterAudioProcessor::setBypassParameter(juce::AudioParameterBool* newBypass) noexcept
+{
+    if (bypassState != newBypass)
+    {
+        bypassState = newBypass;
+        releaseResources();
+        reset();
+    }
+
+}
+
+bool FirstOrderNonLinearFilterAudioProcessor::supportsDoublePrecisionProcessing() const
+{
+    return false;
+}
+
+juce::AudioProcessor::ProcessingPrecision FirstOrderNonLinearFilterAudioProcessor::getProcessingPrecision() const noexcept
+{
+    return processingPrecision;
+}
+
+bool FirstOrderNonLinearFilterAudioProcessor::isUsingDoublePrecision() const noexcept
+{
+    return processingPrecision == doublePrecision;
+}
+
+void FirstOrderNonLinearFilterAudioProcessor::setProcessingPrecision(ProcessingPrecision newPrecision) noexcept
+{
+    // If you hit this assertion then you're trying to use double precision
+    // processing on a processor which does not support it!
+    jassert(newPrecision != doublePrecision || supportsDoublePrecisionProcessing());
+
+    if (processingPrecision != newPrecision)
+    {
+        processingPrecision = newPrecision;
+        releaseResources();
+        reset();
+    }
 }
 
 //==============================================================================
@@ -36,29 +86,17 @@ const juce::String FirstOrderNonLinearFilterAudioProcessor::getName() const
 
 bool FirstOrderNonLinearFilterAudioProcessor::acceptsMidi() const
 {
-   #if JucePlugin_WantsMidiInput
-    return true;
-   #else
     return false;
-   #endif
 }
 
 bool FirstOrderNonLinearFilterAudioProcessor::producesMidi() const
 {
-   #if JucePlugin_ProducesMidiOutput
-    return true;
-   #else
     return false;
-   #endif
 }
 
 bool FirstOrderNonLinearFilterAudioProcessor::isMidiEffect() const
 {
-   #if JucePlugin_IsMidiEffect
-    return true;
-   #else
     return false;
-   #endif
 }
 
 double FirstOrderNonLinearFilterAudioProcessor::getTailLengthSeconds() const
@@ -79,15 +117,18 @@ int FirstOrderNonLinearFilterAudioProcessor::getCurrentProgram()
 
 void FirstOrderNonLinearFilterAudioProcessor::setCurrentProgram (int index)
 {
+    juce::ignoreUnused(index);
 }
 
 const juce::String FirstOrderNonLinearFilterAudioProcessor::getProgramName (int index)
 {
+    juce::ignoreUnused(index);
     return {};
 }
 
 void FirstOrderNonLinearFilterAudioProcessor::changeProgramName (int index, const juce::String& newName)
 {
+    juce::ignoreUnused(index, newName);
 }
 
 //==============================================================================
@@ -103,13 +144,32 @@ void FirstOrderNonLinearFilterAudioProcessor::releaseResources()
     // spare memory, etc.
 }
 
-#ifndef JucePlugin_PreferredChannelConfigurations
+void FirstOrderNonLinearFilterAudioProcessor::numChannelsChanged()
+{
+    processorFloat.reset();
+    processorDouble.reset();
+    processorFloat.prepare(getSpec());
+    processorDouble.prepare(getSpec());
+}
+
+void FirstOrderNonLinearFilterAudioProcessor::numBusesChanged()
+{
+    processorFloat.reset();
+    processorDouble.reset();
+    processorFloat.prepare(getSpec());
+    processorDouble.prepare(getSpec());
+}
+
+void FirstOrderNonLinearFilterAudioProcessor::processorLayoutsChanged()
+{
+    processorFloat.reset();
+    processorDouble.reset();
+    processorFloat.prepare(getSpec());
+    processorDouble.prepare(getSpec());
+}
+
 bool FirstOrderNonLinearFilterAudioProcessor::isBusesLayoutSupported (const BusesLayout& layouts) const
 {
-  #if JucePlugin_IsMidiEffect
-    juce::ignoreUnused (layouts);
-    return true;
-  #else
     // This is the place where you check if the layout is supported.
     // In this template code we only support mono or stereo.
     // Some plugin hosts, such as certain GarageBand versions, will only
@@ -119,43 +179,52 @@ bool FirstOrderNonLinearFilterAudioProcessor::isBusesLayoutSupported (const Buse
         return false;
 
     // This checks if the input layout matches the output layout
-   #if ! JucePlugin_IsSynth
     if (layouts.getMainOutputChannelSet() != layouts.getMainInputChannelSet())
         return false;
-   #endif
 
     return true;
-  #endif
 }
-#endif
 
-void FirstOrderNonLinearFilterAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
+void FirstOrderNonLinearFilterAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
 {
-    juce::ScopedNoDenormals noDenormals;
-    auto totalNumInputChannels  = getTotalNumInputChannels();
-    auto totalNumOutputChannels = getTotalNumOutputChannels();
-
-    // In case we have more outputs than inputs, this code clears any output
-    // channels that didn't contain input data, (because these aren't
-    // guaranteed to be empty - they may contain garbage).
-    // This is here to avoid people getting screaming feedback
-    // when they first compile a plugin, but obviously you don't need to keep
-    // this code if your algorithm always overwrites all the output channels.
-    for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
-        buffer.clear (i, 0, buffer.getNumSamples());
-
-    // This is the place where you'd normally do the guts of your plugin's
-    // audio processing...
-    // Make sure to reset the state if your inner loop is processing
-    // the samples and the outer loop is handling the channels.
-    // Alternatively, you can process the samples with the channels
-    // interleaved by keeping the same state.
-    for (int channel = 0; channel < totalNumInputChannels; ++channel)
+    if (bypassState->get() == true)
     {
-        auto* channelData = buffer.getWritePointer (channel);
-
-        // ..do something to the data...
+        processBlockBypassed(buffer, midiMessages);
     }
+
+    else
+    {
+        juce::ScopedNoDenormals noDenormals;
+
+        processorFloat.process(buffer, midiMessages);
+    }
+}
+
+void FirstOrderNonLinearFilterAudioProcessor::processBlock(juce::AudioBuffer<double>& buffer, juce::MidiBuffer& midiMessages)
+{
+    if (bypassState->get() == true)
+    {
+        processBlockBypassed(buffer, midiMessages);
+    }
+
+    else
+    {
+        juce::ScopedNoDenormals noDenormals;
+
+        processorDouble.process(buffer, midiMessages);
+    }
+}
+
+void FirstOrderNonLinearFilterAudioProcessor::processBlockBypassed(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
+{
+    juce::ignoreUnused(buffer);
+    juce::ignoreUnused(midiMessages);
+}
+
+void FirstOrderNonLinearFilterAudioProcessor::processBlockBypassed(juce::AudioBuffer<double>& buffer, juce::MidiBuffer& midiMessages)
+{
+    juce::ignoreUnused(buffer);
+    juce::ignoreUnused(midiMessages);
 }
 
 //==============================================================================
@@ -166,21 +235,50 @@ bool FirstOrderNonLinearFilterAudioProcessor::hasEditor() const
 
 juce::AudioProcessorEditor* FirstOrderNonLinearFilterAudioProcessor::createEditor()
 {
-    return new FirstOrderNonLinearFilterAudioProcessorEditor (*this);
+    return new FirstOrderNonLinearFilterAudioProcessorEditor (*this, getAPVTS(), undoManager);
+}
+
+juce::AudioProcessorValueTreeState::ParameterLayout FirstOrderNonLinearFilterAudioProcessor::createParameterLayout()
+{
+    APVTS::ParameterLayout params;
+
+    Parameters::setParameterLayout(params);
+
+    return params;
 }
 
 //==============================================================================
-void FirstOrderNonLinearFilterAudioProcessor::getStateInformation (juce::MemoryBlock& destData)
+void FirstOrderNonLinearFilterAudioProcessor::getStateInformation(juce::MemoryBlock& destData)
 {
-    // You should use this method to store your parameters in the memory block.
-    // You could do that either as raw data, or use the XML or ValueTree classes
-    // as intermediaries to make it easy to save and load complex data.
+    auto state = apvts.copyState();
+    std::unique_ptr<juce::XmlElement> xml(state.createXml());
+    copyXmlToBinary(*xml, destData);
 }
 
-void FirstOrderNonLinearFilterAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
+void FirstOrderNonLinearFilterAudioProcessor::getCurrentProgramStateInformation(juce::MemoryBlock& destData)
 {
-    // You should use this method to restore your parameters from this memory block,
-    // whose contents will have been created by the getStateInformation() call.
+    auto state = apvts.copyState();
+    std::unique_ptr<juce::XmlElement> xml(state.createXml());
+    copyXmlToBinary(*xml, destData);
+}
+
+
+void FirstOrderNonLinearFilterAudioProcessor::setStateInformation(const void* data, int sizeInBytes)
+{
+    std::unique_ptr<juce::XmlElement> xmlState(getXmlFromBinary(data, sizeInBytes));
+
+    if (xmlState.get() != nullptr)
+        if (xmlState->hasTagName(apvts.state.getType()))
+            apvts.replaceState(juce::ValueTree::fromXml(*xmlState));
+}
+
+void FirstOrderNonLinearFilterAudioProcessor::setCurrentProgramStateInformation(const void* data, int sizeInBytes)
+{
+    std::unique_ptr<juce::XmlElement> xmlState(getXmlFromBinary(data, sizeInBytes));
+
+    if (xmlState.get() != nullptr)
+        if (xmlState->hasTagName(apvts.state.getType()))
+            apvts.replaceState(juce::ValueTree::fromXml(*xmlState));
 }
 
 //==============================================================================
