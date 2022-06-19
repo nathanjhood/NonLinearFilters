@@ -215,14 +215,28 @@ SampleType FirstOrderNLfilter<SampleType>::directFormIITransposed(int channel, S
 {
     auto& Xn1 = Xn_1[(size_t)channel];
 
-    SampleType Xn = inputValue;
+    auto Xn = inputValue;
 
-    SampleType Yn = ((Xn * b0) + Xn1);
+    auto Yn = ((Xn * b0) + Xn1);
 
-    Xn1 = ((Xn * b1) + (Yn * a1));
+    Xn1 = std::tanh((Xn * b1) + (Yn * a1));
 
     return Yn;
 }
+
+//template <typename SampleType>
+//SampleType FirstOrderNLfilter<SampleType>::directFormIITransposedNLFeedback(int channel, SampleType inputValue)
+//{
+//    auto& Xn1 = Xn_1[(size_t)channel];
+//
+//    auto Xn = inputValue;
+//
+//    auto Yn = ((Xn * b0) + Xn1);
+//
+//    Xn1 = ((Xn * b1) + (std::tanh(Yn) * a1));
+//
+//    return Yn;
+//}
 
 template <typename SampleType>
 void FirstOrderNLfilter<SampleType>::coefficients()
