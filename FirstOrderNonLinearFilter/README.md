@@ -12,6 +12,10 @@ Coffee! That's how I get things done!! If you'd like to see me get more things d
  <a href= "https://www.facebook.com/StoneyDSP.Audio/"><img src="https://github.com/StoneyDSP/StoneyDSP/blob/9608562b09ee2708affd0c31117fc25a235672d9/Assets/facebook.png"/></a>
 </p>
 
+# First-Order Non-Linear Filter
+
+![FirstOrderNonLinearFilter-MainImage](https://github.com/StoneyDSP/NonLinearFilters/blob/0d1e2eb78f942be89081301d01248a76dd01bcef/FirstOrderNonLinearFilter/Res/FirstOrderNonLinearFilter-MainImage.png)
+
 # Manual - v0.1.01b
 
 + coming soon!
