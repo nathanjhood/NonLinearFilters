@@ -54,7 +54,7 @@ private:
     /** Instantiate objects. */
     juce::dsp::DryWetMixer<SampleType> mixer;
     FirstOrderNLfilter<SampleType> filter;
-    juce::dsp::Gain<SampleType> output;
+    juce::dsp::Gain<SampleType> driveUp, driveDn, output;
 
     //==========================================================================
     /** Parameter pointers. */
@@ -66,6 +66,7 @@ private:
     juce::AudioParameterFloat* outputPtr{ nullptr };
     juce::AudioParameterFloat* mixPtr{ nullptr };
     juce::AudioParameterBool* bypassPtr{ nullptr };
+    juce::AudioParameterFloat* drivePtr{ nullptr };
 
     //==========================================================================
     /** Init variables. */
