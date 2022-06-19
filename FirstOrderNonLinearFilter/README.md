@@ -12,9 +12,11 @@ Coffee! That's how I get things done!! If you'd like to see me get more things d
  <a href= "https://www.facebook.com/StoneyDSP.Audio/"><img src="https://github.com/StoneyDSP/StoneyDSP/blob/9608562b09ee2708affd0c31117fc25a235672d9/Assets/facebook.png"/></a>
 </p>
 
-# Manual - v0.0.01b
+# Manual - v0.1.01b
 
 + coming soon!
++ Check out the Drive control and the different saturations it provides for the different filter modes meanwhile (shelves require boost or cut to saturate!)
++ OS to be added next, other non-linear functions and implementations to follow...
 
 ...stay tuned for more!
 
