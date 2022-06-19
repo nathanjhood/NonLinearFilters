@@ -42,6 +42,12 @@ public:
     /** Updates the internal state variables of the processor. */
     void update();
 
+    //==========================================================================
+    /** Sets the oversampling factor. */
+    void setOversampling();
+
+    SampleType getLatencySamples() const noexcept;
+
 private:
     //==========================================================================
     // This reference is provided as a quick way for the wrapper to
@@ -52,6 +58,7 @@ private:
 
     //==========================================================================
     /** Instantiate objects. */
+    std::unique_ptr<juce::dsp::Oversampling<SampleType>> oversampler[5];
     juce::dsp::DryWetMixer<SampleType> mixer;
     FirstOrderNLfilter<SampleType> filter;
     juce::dsp::Gain<SampleType> driveUp, driveDn, output;
@@ -59,10 +66,9 @@ private:
     //==========================================================================
     /** Parameter pointers. */
     juce::AudioParameterFloat* frequencyPtr{ nullptr };
-    juce::AudioParameterFloat* resonancePtr{ nullptr };
     juce::AudioParameterFloat* gainPtr{ nullptr };
     juce::AudioParameterChoice* typePtr{ nullptr };
-    juce::AudioParameterChoice* transformPtr{ nullptr };
+    juce::AudioParameterChoice* osPtr{ nullptr };
     juce::AudioParameterFloat* outputPtr{ nullptr };
     juce::AudioParameterFloat* mixPtr{ nullptr };
     juce::AudioParameterBool* bypassPtr{ nullptr };
@@ -70,6 +76,7 @@ private:
 
     //==========================================================================
     /** Init variables. */
+    int curOS = 0, prevOS = 0, oversamplingFactor = 1;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ProcessWrapper)
 };
