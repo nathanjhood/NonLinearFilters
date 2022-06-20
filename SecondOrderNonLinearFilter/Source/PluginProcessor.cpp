@@ -117,15 +117,18 @@ int SecondOrderNonLinearFilterAudioProcessor::getCurrentProgram()
 
 void SecondOrderNonLinearFilterAudioProcessor::setCurrentProgram (int index)
 {
+    juce::ignoreUnused(index);
 }
 
 const juce::String SecondOrderNonLinearFilterAudioProcessor::getProgramName (int index)
 {
+    juce::ignoreUnused(index);
     return {};
 }
 
 void SecondOrderNonLinearFilterAudioProcessor::changeProgramName (int index, const juce::String& newName)
 {
+    juce::ignoreUnused(index, newName);
 }
 
 //==============================================================================
@@ -133,12 +136,40 @@ void SecondOrderNonLinearFilterAudioProcessor::prepareToPlay (double sampleRate,
 {
     // Use this method as the place to do any pre-playback
     // initialisation that you need..
+    processorFloat.prepare(getSpec());
+    processorDouble.prepare(getSpec());
 }
 
 void SecondOrderNonLinearFilterAudioProcessor::releaseResources()
 {
     // When playback stops, you can use this as an opportunity to free up any
     // spare memory, etc.
+    processorFloat.reset();
+    processorDouble.reset();
+}
+
+void SecondOrderNonLinearFilterAudioProcessor::numChannelsChanged()
+{
+    processorFloat.reset();
+    processorDouble.reset();
+    processorFloat.prepare(getSpec());
+    processorDouble.prepare(getSpec());
+}
+
+void SecondOrderNonLinearFilterAudioProcessor::numBusesChanged()
+{
+    processorFloat.reset();
+    processorDouble.reset();
+    processorFloat.prepare(getSpec());
+    processorDouble.prepare(getSpec());
+}
+
+void SecondOrderNonLinearFilterAudioProcessor::processorLayoutsChanged()
+{
+    processorFloat.reset();
+    processorDouble.reset();
+    processorFloat.prepare(getSpec());
+    processorDouble.prepare(getSpec());
 }
 
 bool SecondOrderNonLinearFilterAudioProcessor::isBusesLayoutSupported (const BusesLayout& layouts) const
