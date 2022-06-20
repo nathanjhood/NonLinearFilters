@@ -53,12 +53,13 @@ private:
     //==========================================================================
     /** Instantiate objects. */
     juce::dsp::DryWetMixer<SampleType> mixer;
-    FirstOrderNLfilter<SampleType> filter;
+    SecondOrderNLfilter<SampleType> filter;
     juce::dsp::Gain<SampleType> driveUp, driveDn, output;
 
     //==========================================================================
     /** Parameter pointers. */
     juce::AudioParameterFloat* frequencyPtr{ nullptr };
+    juce::AudioParameterFloat* resonancePtr{ nullptr };
     juce::AudioParameterFloat* gainPtr{ nullptr };
     juce::AudioParameterChoice* typePtr{ nullptr };
     juce::AudioParameterFloat* outputPtr{ nullptr };

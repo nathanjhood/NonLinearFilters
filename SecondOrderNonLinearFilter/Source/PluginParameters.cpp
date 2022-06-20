@@ -48,6 +48,10 @@ void Parameters::setParameterLayout(Params& params)
         .withLabel(frequency)
         .withCategory(genParam);
 
+    auto resAttributes = juce::AudioParameterFloatAttributes()
+        .withLabel(reso)
+        .withCategory(genParam);
+
     auto gainAttributes = juce::AudioParameterFloatAttributes()
         .withLabel(decibels)
         .withCategory(genParam);
@@ -65,6 +69,7 @@ void Parameters::setParameterLayout(Params& params)
         (std::make_unique<juce::AudioProcessorParameterGroup>("BandOneID", "0", "seperatorA",
             //==================================================================
             std::make_unique<juce::AudioParameterFloat>("frequencyID", "Frequency", freqRange, 632.455f, freqAttributes),
+            std::make_unique<juce::AudioParameterFloat>("resonanceID", "Resonance", resRange, 00.10f, resAttributes),
             std::make_unique<juce::AudioParameterFloat>("gainID", "Shelf +/-", gainRange, 00.00f, gainAttributes),
             std::make_unique<juce::AudioParameterFloat>("driveID", "Drive", gainRange, 00.00f, gainAttributes),
             std::make_unique<juce::AudioParameterChoice>("typeID", "Type", fString, 0)
