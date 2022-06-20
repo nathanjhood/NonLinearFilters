@@ -46,7 +46,7 @@ void SecondOrderNonLinearFilterAudioProcessorEditor::timerCallback()
 void SecondOrderNonLinearFilterAudioProcessorEditor::paint (juce::Graphics& g)
 {
     // (Our component is opaque, so we must completely fill the background with a solid colour)
-    g.fillAll(juce::Colours::cornflowerblue);
+    g.fillAll(juce::Colours::blueviolet);
 
     //// draw an outline around the component
     g.setColour(juce::Colours::darkslategrey);

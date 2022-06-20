@@ -27,7 +27,7 @@ void Parameters::setParameterLayout(Params& params)
     const auto mixRange = juce::NormalisableRange<float>(00.00f, 100.00f, 0.01f, 1.00f);
     const auto outputRange = juce::NormalisableRange<float>(dBOut, dBMax, 0.01f, 1.00f);
 
-    const auto fString = juce::StringArray({ "LP", "HP", "LS(c)", "LS" , "HS(c)", "HS" });
+    const auto fString = juce::StringArray({ "LP2", "LP1", "HP2", "HP1" , "BP2", "BP2c", "LS2", "LS1c", "LS1", "HS2", "HS1c", "HS1", "PK2", "NX2", "AP2" });
     const auto tString = juce::StringArray({ "DFI", "DFII", "DFI t", "DFII t" });
     const auto osString = juce::StringArray({ "--", "2x", "4x", "8x", "16x" });
 
