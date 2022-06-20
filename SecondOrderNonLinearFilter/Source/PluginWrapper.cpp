@@ -23,6 +23,7 @@ ProcessWrapper<SampleType>::ProcessWrapper(SecondOrderNonLinearFilterAudioProces
     setup.numChannels = audioProcessor.getTotalNumInputChannels();
 
     frequencyPtr = dynamic_cast <juce::AudioParameterFloat*> (state.getParameter("frequencyID"));
+    resonancePtr = dynamic_cast <juce::AudioParameterFloat*> (state.getParameter("resonanceID"));
     gainPtr = dynamic_cast <juce::AudioParameterFloat*> (state.getParameter("gainID"));
     typePtr = dynamic_cast <juce::AudioParameterChoice*> (state.getParameter("typeID"));
     outputPtr = dynamic_cast <juce::AudioParameterFloat*> (state.getParameter("outputID"));
@@ -31,6 +32,7 @@ ProcessWrapper<SampleType>::ProcessWrapper(SecondOrderNonLinearFilterAudioProces
     drivePtr = dynamic_cast <juce::AudioParameterFloat*> (state.getParameter("driveID"));
 
     jassert(frequencyPtr != nullptr);
+    jassert(resonancePtr != nullptr);
     jassert(gainPtr != nullptr);
     jassert(typePtr != nullptr);
     jassert(outputPtr != nullptr);
@@ -62,7 +64,7 @@ template <typename SampleType>
 void ProcessWrapper<SampleType>::reset()
 {
     mixer.reset();
-    mixer.setWetLatency(audioProcessor.getLatencySamples());
+    mixer.setWetLatency(static_cast<SampleType>(audioProcessor.getLatencySamples()));
     driveUp.reset();
     filter.reset(static_cast<SampleType>(0.0));
     driveDn.reset();
@@ -108,6 +110,7 @@ void ProcessWrapper<SampleType>::update()
     mixer.setWetMixProportion(mixPtr->get() * 0.01f);
     driveUp.setGainLinear(juce::Decibels::decibelsToGain(drivePtr->get()));
     filter.setFrequency(frequencyPtr->get());
+    filter.setResonance(resonancePtr->get());
     filter.setGain(gainPtr->get());
     filter.setFilterType(static_cast<FilterType>(typePtr->getIndex()));
     driveDn.setGainLinear(juce::Decibels::decibelsToGain(drivePtr->get() * static_cast<SampleType>(-1.0)));
