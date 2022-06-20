@@ -2,9 +2,30 @@
 
 <JUCERPROJECT id="GZUejJ" name="SecondOrderNonLinearFilter" projectType="audioplug"
               useAppConfig="0" addUsingNamespaceToJuceHeader="0" displaySplashScreen="1"
-              jucerFormatVersion="1">
+              jucerFormatVersion="1" companyName="StoneyDSP" companyEmail="Nathan@StoneyDSP.com"
+              version="0.0.01" pluginFormats="buildVST3" cppLanguageStandard="latest">
   <MAINGROUP id="B5JMqI" name="SecondOrderNonLinearFilter">
     <GROUP id="{8BE3EC25-17AF-57A0-BB04-BBB511719535}" name="Source">
+      <FILE id="cHCXuR" name="PluginParameters.cpp" compile="1" resource="0"
+            file="Source/PluginParameters.cpp"/>
+      <FILE id="a5woCr" name="PluginParameters.h" compile="0" resource="0"
+            file="Source/PluginParameters.h"/>
+      <FILE id="CaCgmJ" name="PluginWrapper.cpp" compile="1" resource="0"
+            file="Source/PluginWrapper.cpp"/>
+      <FILE id="dupXxE" name="PluginWrapper.h" compile="0" resource="0" file="Source/PluginWrapper.h"/>
+      <GROUP id="{E6282E5F-15C5-C60E-6165-4084CB2F7F66}" name="Modules">
+        <FILE id="ssbwzW" name="SecondOrderNLfilter.cpp" compile="1" resource="0"
+              file="Source/Modules/SecondOrderNLfilter.cpp"/>
+        <FILE id="vRg3JC" name="SecondOrderNLfilter.h" compile="0" resource="0"
+              file="Source/Modules/SecondOrderNLfilter.h"/>
+        <FILE id="mByCYc" name="Oversampler.cpp" compile="1" resource="0" file="Source/Modules/Oversampler.cpp"/>
+        <FILE id="cxfWMZ" name="Oversampler.h" compile="0" resource="0" file="Source/Modules/Oversampler.h"/>
+      </GROUP>
+      <GROUP id="{C3A9472E-32E0-646C-0575-96EE7B3AA976}" name="Components">
+        <FILE id="DIyGLn" name="AutoComponent.cpp" compile="1" resource="0"
+              file="Source/Components/AutoComponent.cpp"/>
+        <FILE id="CJ5P2d" name="AutoComponent.h" compile="0" resource="0" file="Source/Components/AutoComponent.h"/>
+      </GROUP>
       <FILE id="Ppn1Fb" name="PluginProcessor.cpp" compile="1" resource="0"
             file="Source/PluginProcessor.cpp"/>
       <FILE id="rF32RP" name="PluginProcessor.h" compile="0" resource="0"
@@ -18,8 +39,10 @@
   <EXPORTFORMATS>
     <VS2022 targetFolder="Builds/VisualStudio2022">
       <CONFIGURATIONS>
-        <CONFIGURATION isDebug="1" name="Debug" targetName="SecondOrderNonLinearFilter"/>
-        <CONFIGURATION isDebug="0" name="Release" targetName="SecondOrderNonLinearFilter"/>
+        <CONFIGURATION isDebug="1" name="Debug" targetName="SecondOrderNonLinearFilter"
+                       enablePluginBinaryCopyStep="1" vst3BinaryLocation="C:\Program Files\Common Files\VST3\StoneyDSP"/>
+        <CONFIGURATION isDebug="0" name="Release" targetName="SecondOrderNonLinearFilter"
+                       enablePluginBinaryCopyStep="1" vst3BinaryLocation="C:\Program Files\Common Files\VST3\StoneyDSP"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_audio_basics" path="../../../Users/Nathan/DSP/JUCE/modules"/>
