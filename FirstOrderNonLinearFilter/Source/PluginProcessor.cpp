@@ -46,7 +46,6 @@ void FirstOrderNonLinearFilterAudioProcessor::setBypassParameter(juce::AudioPara
         releaseResources();
         reset();
     }
-
 }
 
 bool FirstOrderNonLinearFilterAudioProcessor::supportsDoublePrecisionProcessing() const
@@ -136,36 +135,16 @@ void FirstOrderNonLinearFilterAudioProcessor::prepareToPlay (double sampleRate, 
 {
     // Use this method as the place to do any pre-playback
     // initialisation that you need..
+    processorFloat.prepare(getSpec());
+    processorDouble.prepare(getSpec());
 }
 
 void FirstOrderNonLinearFilterAudioProcessor::releaseResources()
 {
     // When playback stops, you can use this as an opportunity to free up any
     // spare memory, etc.
-}
-
-void FirstOrderNonLinearFilterAudioProcessor::numChannelsChanged()
-{
     processorFloat.reset();
     processorDouble.reset();
-    processorFloat.prepare(getSpec());
-    processorDouble.prepare(getSpec());
-}
-
-void FirstOrderNonLinearFilterAudioProcessor::numBusesChanged()
-{
-    processorFloat.reset();
-    processorDouble.reset();
-    processorFloat.prepare(getSpec());
-    processorDouble.prepare(getSpec());
-}
-
-void FirstOrderNonLinearFilterAudioProcessor::processorLayoutsChanged()
-{
-    processorFloat.reset();
-    processorDouble.reset();
-    processorFloat.prepare(getSpec());
-    processorDouble.prepare(getSpec());
 }
 
 bool FirstOrderNonLinearFilterAudioProcessor::isBusesLayoutSupported (const BusesLayout& layouts) const
