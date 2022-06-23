@@ -25,12 +25,13 @@ enum class FilterType
     highShelfC = 5,
 };
 
-enum class TransformationType
+enum class SaturationType
 {
-    directFormI = 0,
-    directFormII = 1,
-    directFormItransposed = 2,
-    directFormIItransposed = 3
+    linear = 0,
+    nonlinear1 = 1,
+    nonlinear2 = 2,
+    nonlinear3 = 3,
+    nonlinear4 = 4
 };
 
 
@@ -39,7 +40,7 @@ class FirstOrderNLfilter
 {
 public:
     using filterType = FilterType;
-    using transformationType = TransformationType;
+    using satType = SaturationType;
     //==============================================================================
     /** Constructor. */
     FirstOrderNLfilter();
@@ -51,11 +52,14 @@ public:
     /** Sets the centre Frequency gain of the filter. Peak and shelf modes only. */
     void setGain(SampleType newGain);
 
+    /** Sets the saturation drive level */
+    void setDrive(SampleType newDrive);
+
     /** Sets the type of the filter. See enum for available types. */
     void setFilterType(filterType newFiltType);
 
     /** Sets the BiLinear Transform for the filter to use. See enum for available types. */
-    void setTransformType(transformationType newTransformType);
+    void setSaturationType(satType newTransformType);
 
     //==============================================================================
     /** Sets the length of the ramp used for smoothing parameter changes. */
@@ -97,6 +101,7 @@ public:
         {
             frq.skip(static_cast<int> (len));
             lev.skip(static_cast<int> (len));
+            drv.skip(static_cast<int> (len));
 
             outputBlock.copyFrom(inputBlock);
             return;
@@ -120,26 +125,27 @@ public:
     /** Processes one sample at a time on a given channel. */
     SampleType processSample(int channel, SampleType inputValue);
 
-    double sampleRate = 44100.0, rampDurationSeconds = 0.00005;
+    //==============================================================================
+    SampleType getb0() { return static_cast<SampleType>(b0); }
+    SampleType getb1() { return static_cast<SampleType>(b1); }
+    SampleType geta0() { return static_cast<SampleType>(a0); }
+    SampleType geta1() { return static_cast<SampleType>(a1); }
 
 private:
 
     //==============================================================================
     void coefficients();
 
-    SampleType directFormI(int channel, SampleType inputValue);
-
-    SampleType directFormII(int channel, SampleType inputValue);
-
-    SampleType directFormITransposed(int channel, SampleType inputValue);
-
-    SampleType directFormIITransposed(int channel, SampleType inputValue);
-
     //==============================================================================
-    SampleType getb0() { return static_cast<SampleType>(b0); }
-    SampleType getb1() { return static_cast<SampleType>(b1); }
-    SampleType geta0() { return static_cast<SampleType>(a0); }
-    SampleType geta1() { return static_cast<SampleType>(a1); }
+    SampleType linear(int channel, SampleType inputValue);
+
+    SampleType nonlinear1(int channel, SampleType inputValue);
+
+    SampleType nonlinear2(int channel, SampleType inputValue);
+
+    SampleType nonlinear3(int channel, SampleType inputValue);
+
+    SampleType nonlinear4(int channel, SampleType inputValue);
 
     //==============================================================================
     /** Unit-delay objects. */
@@ -156,17 +162,19 @@ private:
     /** Parameter Smoothers. */
     juce::SmoothedValue<SampleType, juce::ValueSmoothingTypes::Multiplicative> frq;
     juce::SmoothedValue<SampleType, juce::ValueSmoothingTypes::Linear> lev;
+    juce::SmoothedValue<SampleType, juce::ValueSmoothingTypes::Linear> drv;
 
     //==============================================================================
     /** Initialise the parameters. */
-    SampleType minFreq = 20.0, maxFreq = 20000.0, hz = 1000.0, g = 0.0;
+    SampleType minFreq = 20.0, maxFreq = 20000.0, hz = 1000.0, g = 0.0 , d = 0.0;
     filterType filtType = filterType::lowPass;
-    transformationType transformType = transformationType::directFormIItransposed;
+    satType saturationType = satType::linear;
 
     //==============================================================================
     /** Initialise constants. */
     const SampleType zero = (0.0), one = (1.0), two = (2.0), minusOne = (-1.0), minusTwo = (-2.0);
     const SampleType pi = (juce::MathConstants<SampleType>::pi);
+    double sampleRate = 44100.0, rampDurationSeconds = 0.00005;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(FirstOrderNLfilter)
 };

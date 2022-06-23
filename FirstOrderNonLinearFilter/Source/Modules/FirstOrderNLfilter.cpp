@@ -36,6 +36,14 @@ void FirstOrderNLfilter<SampleType>::setGain(SampleType newGain)
 }
 
 template <typename SampleType>
+void FirstOrderNLfilter<SampleType>::setDrive(SampleType newDrive)
+{
+    d = static_cast<SampleType>(newDrive);
+    drv.setTargetValue(d);
+    coefficients();
+}
+
+template <typename SampleType>
 void FirstOrderNLfilter<SampleType>::setFilterType(filterType newFiltType)
 {
     if (filtType != newFiltType)
@@ -47,11 +55,11 @@ void FirstOrderNLfilter<SampleType>::setFilterType(filterType newFiltType)
 }
 
 template <typename SampleType>
-void FirstOrderNLfilter<SampleType>::setTransformType(transformationType newTransformType)
+void FirstOrderNLfilter<SampleType>::setSaturationType(satType newTransformType)
 {
-    if (transformType != newTransformType)
+    if (saturationType != newTransformType)
     {
-        transformType = newTransformType;
+        saturationType = newTransformType;
         reset(static_cast<SampleType>(0.0));
         coefficients();
     }
@@ -77,9 +85,9 @@ double FirstOrderNLfilter<SampleType>::getRampDurationSeconds() const noexcept
 template <typename SampleType>
 bool FirstOrderNLfilter<SampleType>::isSmoothing() const noexcept
 {
-    bool compSmoothing = frq.isSmoothing() || lev.isSmoothing();
+    bool smoothersActive = frq.isSmoothing() || lev.isSmoothing() || drv.isSmoothing() ;
 
-    return compSmoothing;
+    return smoothersActive;
 }
 
 //==============================================================================
@@ -117,6 +125,7 @@ void FirstOrderNLfilter<SampleType>::reset(SampleType initialValue)
 
     frq.reset(sampleRate, rampDurationSeconds);
     lev.reset(sampleRate, rampDurationSeconds);
+    drv.reset(sampleRate, rampDurationSeconds);
 
     coefficients();
 }
@@ -128,55 +137,28 @@ SampleType FirstOrderNLfilter<SampleType>::processSample(int channel, SampleType
     jassert(juce::isPositiveAndBelow(channel, Xn_1.size()));
     jassert(juce::isPositiveAndBelow(channel, Yn_1.size()));
 
-    switch (transformType)
+    switch (saturationType)
     {
-    case TransformationType::directFormI:
-        inputValue = directFormI(channel, inputValue);
+    case SaturationType::linear:
+        inputValue = linear(channel, inputValue);
         break;
-    case TransformationType::directFormII:
-        inputValue = directFormII(channel, inputValue);
+    case SaturationType::nonlinear1:
+        inputValue = nonlinear1(channel, inputValue);
         break;
-    case TransformationType::directFormItransposed:
-        inputValue = directFormITransposed(channel, inputValue);
+    case SaturationType::nonlinear2:
+        inputValue = nonlinear2(channel, inputValue);
         break;
-    case TransformationType::directFormIItransposed:
-        inputValue = directFormIITransposed(channel, inputValue);
+    case SaturationType::nonlinear3:
+        inputValue = nonlinear3(channel, inputValue);
+        break;
+    case SaturationType::nonlinear4:
+        inputValue = nonlinear4(channel, inputValue);
         break;
     default:
-        inputValue = directFormIITransposed(channel, inputValue);
+        inputValue = linear(channel, inputValue);
     }
 
     return inputValue;
-}
-
-template <typename SampleType>
-SampleType FirstOrderNLfilter<SampleType>::directFormI(int channel, SampleType inputValue)
-{
-    auto& Xn1 = Xn_1[(size_t)channel];
-    auto& Yn1 = Yn_1[(size_t)channel];
-
-    SampleType Xn = inputValue;
-
-    SampleType Yn = ((Xn * b0) + (Xn1 * b1) + (Yn1 * a1));
-
-    Xn1 = Xn, Yn1 = Yn;
-
-    return Yn;
-}
-
-template <typename SampleType>
-SampleType FirstOrderNLfilter<SampleType>::directFormII(int channel, SampleType inputValue)
-{
-    auto& Wn1 = Wn_1[(size_t)channel];
-
-    SampleType Xn = inputValue;
-
-    SampleType Wn = (Xn + ((Wn1 * a1)));
-    SampleType Yn = ((Wn * b0) + (Wn1 * b1));
-
-    Wn1 = Wn;
-
-    return Yn;
 }
 
 //template <typename SampleType>
@@ -195,59 +177,80 @@ SampleType FirstOrderNLfilter<SampleType>::directFormII(int channel, SampleType 
 //}
 
 template <typename SampleType>
-SampleType FirstOrderNLfilter<SampleType>::directFormITransposed(int channel, SampleType inputValue)
+SampleType FirstOrderNLfilter<SampleType>::linear(int channel, SampleType inputValue)
 {
-    auto& Wn1 = Wn_1[(size_t)channel];
-    auto& Yn1 = Yn_1[(size_t)channel];
+    auto& Xn1 = Xn_1[(size_t)channel];
 
     SampleType Xn = inputValue;
 
-    SampleType Wn = (Xn + Wn1);
-    SampleType Yn = ((Wn * b0) + Yn1);
+    SampleType Yn = ((Xn * b0) + Xn1);
 
-    Wn1 = (Wn * a1), Yn1 = ((Wn * b1));
+    Xn1 = ((Xn * b1) + (Yn * a1));
 
     return Yn;
 }
 
 template <typename SampleType>
-SampleType FirstOrderNLfilter<SampleType>::directFormIITransposed(int channel, SampleType inputValue)
+SampleType FirstOrderNLfilter<SampleType>::nonlinear1(int channel, SampleType inputValue)
 {
     auto& Xn1 = Xn_1[(size_t)channel];
 
-    auto Xn = inputValue;
+    SampleType Xn = inputValue;
 
-    auto Yn = ((Xn * b0) + Xn1);
+    SampleType Yn = ((Xn * b0) + Xn1);
 
     Xn1 = std::tanh((Xn * b1) + (Yn * a1));
 
     return Yn;
 }
 
-//template <typename SampleType>
-//SampleType FirstOrderNLfilter<SampleType>::directFormIITransposedNLFeedback(int channel, SampleType inputValue)
-//{
-//    auto& Xn1 = Xn_1[(size_t)channel];
-//
-//    auto Xn = inputValue;
-//
-//    auto Yn = ((Xn * b0) + Xn1);
-//
-//    Xn1 = ((Xn * b1) + (std::tanh(Yn) * a1));
-//
-//    return Yn;
-//}
+template <typename SampleType>
+SampleType FirstOrderNLfilter<SampleType>::nonlinear2(int channel, SampleType inputValue)
+{
+    auto& Xn1 = Xn_1[(size_t)channel];
+
+    SampleType Xn = inputValue;
+
+    SampleType Yn = std::tanh((Xn * b0) + Xn1);
+
+    Xn1 = ((Xn * b1) + ((Yn) * a1));
+
+    return Yn;
+}
+
+template <typename SampleType>
+SampleType FirstOrderNLfilter<SampleType>::nonlinear3(int channel, SampleType inputValue)
+{
+    auto& Xn1 = Xn_1[(size_t)channel];
+
+    SampleType Xn = inputValue;
+
+    SampleType Yn = std::tanh((Xn * b0) + Xn1);
+
+    Xn1 = std::tanh((Xn * b1) + (Yn * a1));
+
+    return Yn;
+}
+
+template <typename SampleType>
+SampleType FirstOrderNLfilter<SampleType>::nonlinear4(int channel, SampleType inputValue)
+{
+    auto& Xn1 = Xn_1[(size_t)channel];
+
+    SampleType Xn = std::sin(inputValue);
+
+    SampleType Yn = std::asin((Xn * b0) + Xn1);
+
+    Xn1 = ((Xn * b1) + (Yn * a1));
+
+    return Yn;
+}
 
 template <typename SampleType>
 void FirstOrderNLfilter<SampleType>::coefficients()
 {
     SampleType omega = static_cast <SampleType>(frq.getNextValue() * ((pi * two) / sampleRate));
-    SampleType cos = static_cast <SampleType>(std::cos(omega));
-    SampleType sin = static_cast <SampleType>(std::sin(omega));
-    SampleType tan = static_cast <SampleType>(sin / cos);
     SampleType a = static_cast <SampleType>(juce::Decibels::decibelsToGain(static_cast<SampleType>(lev.getNextValue() * static_cast <SampleType>(0.5))));
-
-    juce::ignoreUnused(tan);
 
     SampleType b_0 = one;
     SampleType b_1 = zero;
@@ -256,6 +259,7 @@ void FirstOrderNLfilter<SampleType>::coefficients()
 
     switch (filtType)
     {
+
     case filterType::lowPass:
 
         b_0 = omega / (one + omega);
