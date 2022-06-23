@@ -52,9 +52,6 @@ public:
     /** Sets the centre Frequency gain of the filter. Peak and shelf modes only. */
     void setGain(SampleType newGain);
 
-    /** Sets the saturation drive level */
-    void setDrive(SampleType newDrive);
-
     /** Sets the type of the filter. See enum for available types. */
     void setFilterType(filterType newFiltType);
 
@@ -101,7 +98,6 @@ public:
         {
             frq.skip(static_cast<int> (len));
             lev.skip(static_cast<int> (len));
-            drv.skip(static_cast<int> (len));
 
             outputBlock.copyFrom(inputBlock);
             return;
@@ -125,13 +121,16 @@ public:
     /** Processes one sample at a time on a given channel. */
     SampleType processSample(int channel, SampleType inputValue);
 
+    
+    
+
+private:
+
     //==============================================================================
     SampleType getb0() { return static_cast<SampleType>(b0); }
     SampleType getb1() { return static_cast<SampleType>(b1); }
     SampleType geta0() { return static_cast<SampleType>(a0); }
     SampleType geta1() { return static_cast<SampleType>(a1); }
-
-private:
 
     //==============================================================================
     void coefficients();
@@ -162,11 +161,10 @@ private:
     /** Parameter Smoothers. */
     juce::SmoothedValue<SampleType, juce::ValueSmoothingTypes::Multiplicative> frq;
     juce::SmoothedValue<SampleType, juce::ValueSmoothingTypes::Linear> lev;
-    juce::SmoothedValue<SampleType, juce::ValueSmoothingTypes::Linear> drv;
 
     //==============================================================================
     /** Initialise the parameters. */
-    SampleType minFreq = 20.0, maxFreq = 20000.0, hz = 1000.0, g = 0.0 , d = 0.0;
+    SampleType minFreq = 20.0, maxFreq = 20000.0, hz = 1000.0, g = 0.0;
     filterType filtType = filterType::lowPass;
     satType saturationType = satType::linear;
 

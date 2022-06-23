@@ -36,14 +36,6 @@ void FirstOrderNLfilter<SampleType>::setGain(SampleType newGain)
 }
 
 template <typename SampleType>
-void FirstOrderNLfilter<SampleType>::setDrive(SampleType newDrive)
-{
-    d = static_cast<SampleType>(newDrive);
-    drv.setTargetValue(d);
-    coefficients();
-}
-
-template <typename SampleType>
 void FirstOrderNLfilter<SampleType>::setFilterType(filterType newFiltType)
 {
     if (filtType != newFiltType)
@@ -85,7 +77,7 @@ double FirstOrderNLfilter<SampleType>::getRampDurationSeconds() const noexcept
 template <typename SampleType>
 bool FirstOrderNLfilter<SampleType>::isSmoothing() const noexcept
 {
-    bool smoothersActive = frq.isSmoothing() || lev.isSmoothing() || drv.isSmoothing() ;
+    bool smoothersActive = frq.isSmoothing() || lev.isSmoothing();
 
     return smoothersActive;
 }
@@ -125,7 +117,6 @@ void FirstOrderNLfilter<SampleType>::reset(SampleType initialValue)
 
     frq.reset(sampleRate, rampDurationSeconds);
     lev.reset(sampleRate, rampDurationSeconds);
-    drv.reset(sampleRate, rampDurationSeconds);
 
     coefficients();
 }
@@ -239,11 +230,11 @@ SampleType FirstOrderNLfilter<SampleType>::nonlinear4(int channel, SampleType in
 
     SampleType Xn = std::sin(inputValue);
 
-    SampleType Yn = std::asin((Xn * b0) + Xn1);
+    SampleType Yn = ((Xn * b0) + Xn1);
 
     Xn1 = ((Xn * b1) + (Yn * a1));
 
-    return Yn;
+    return std::asin(Yn);
 }
 
 template <typename SampleType>

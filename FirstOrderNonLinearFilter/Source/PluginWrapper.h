@@ -61,6 +61,7 @@ private:
     juce::AudioParameterFloat* frequencyPtr{ nullptr };
     juce::AudioParameterFloat* gainPtr{ nullptr };
     juce::AudioParameterChoice* typePtr{ nullptr };
+    juce::AudioParameterChoice* linearityPtr{ nullptr };
     juce::AudioParameterFloat* outputPtr{ nullptr };
     juce::AudioParameterFloat* mixPtr{ nullptr };
     juce::AudioParameterBool* bypassPtr{ nullptr };

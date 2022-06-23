@@ -25,6 +25,7 @@ ProcessWrapper<SampleType>::ProcessWrapper(FirstOrderNonLinearFilterAudioProcess
     frequencyPtr = dynamic_cast <juce::AudioParameterFloat*> (state.getParameter("frequencyID"));
     gainPtr = dynamic_cast <juce::AudioParameterFloat*> (state.getParameter("gainID"));
     typePtr = dynamic_cast <juce::AudioParameterChoice*> (state.getParameter("typeID"));
+    linearityPtr = dynamic_cast <juce::AudioParameterChoice*> (state.getParameter("linearityID"));
     outputPtr = dynamic_cast <juce::AudioParameterFloat*> (state.getParameter("outputID"));
     mixPtr = dynamic_cast <juce::AudioParameterFloat*> (state.getParameter("mixID"));
     bypassPtr = dynamic_cast <juce::AudioParameterBool*> (state.getParameter("bypassID"));
@@ -37,8 +38,6 @@ ProcessWrapper<SampleType>::ProcessWrapper(FirstOrderNonLinearFilterAudioProcess
     jassert(mixPtr != nullptr);
     jassert(bypassPtr != nullptr);
     jassert(drivePtr != nullptr);
-
-    filter.setTransformType(TransformationType::directFormIItransposed);
 }
 
 template <typename SampleType>
@@ -62,7 +61,7 @@ template <typename SampleType>
 void ProcessWrapper<SampleType>::reset()
 {
     mixer.reset();
-    mixer.setWetLatency(audioProcessor.getLatencySamples());
+    //mixer.setWetLatency(static_cast<SampleType>(audioProcessor.getLatencySamples()));
     driveUp.reset();
     filter.reset(static_cast<SampleType>(0.0));
     driveDn.reset();
@@ -106,10 +105,11 @@ void ProcessWrapper<SampleType>::update()
     audioProcessor.setBypassParameter(bypassPtr);
 
     mixer.setWetMixProportion(mixPtr->get() * 0.01f);
-    driveUp.setGainLinear(juce::Decibels::decibelsToGain(drivePtr->get()));
+    driveUp.setGainLinear(juce::Decibels::decibelsToGain(drivePtr->get() * static_cast<SampleType>(1.0)));
     filter.setFrequency(frequencyPtr->get());
     filter.setGain(gainPtr->get());
     filter.setFilterType(static_cast<FilterType>(typePtr->getIndex()));
+    filter.setSaturationType(static_cast<SaturationType>(linearityPtr->getIndex()));
     driveDn.setGainLinear(juce::Decibels::decibelsToGain(drivePtr->get() * static_cast<SampleType>(-1.0)));
     output.setGainLinear(juce::Decibels::decibelsToGain(outputPtr->get()));
 }
