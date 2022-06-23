@@ -38,10 +38,6 @@ public:
     void prepareToPlay(double sampleRate, int samplesPerBlock) override;
     void releaseResources() override;
 
-    //==========================================================================
-    void numChannelsChanged() override;
-    void numBusesChanged() override;
-    void processorLayoutsChanged() override;
     bool isBusesLayoutSupported(const BusesLayout& layouts) const override;
 
     //==========================================================================
