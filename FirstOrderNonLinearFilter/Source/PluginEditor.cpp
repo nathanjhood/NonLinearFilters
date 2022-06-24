@@ -10,11 +10,10 @@
 #include "PluginEditor.h"
 
 //==============================================================================
-FirstOrderNonLinearFilterAudioProcessorEditor::FirstOrderNonLinearFilterAudioProcessorEditor (FirstOrderNonLinearFilterAudioProcessor& p, juce::UndoManager& um)
+FirstOrderNonLinearFilterAudioProcessorEditor::FirstOrderNonLinearFilterAudioProcessorEditor (FirstOrderNonLinearFilterAudioProcessor& p)
     :
     juce::AudioProcessorEditor(&p),
     audioProcessor(p),
-    undoManager(um),
     subComponents(p, p.getAPVTS())
 {
     // Make sure that before the constructor has finished, you've set the
@@ -22,8 +21,8 @@ FirstOrderNonLinearFilterAudioProcessorEditor::FirstOrderNonLinearFilterAudioPro
     addAndMakeVisible(subComponents);
     addAndMakeVisible(undoButton);
     addAndMakeVisible(redoButton);
-    undoButton.onClick = [this] { undoManager.undo(); };
-    redoButton.onClick = [this] { undoManager.redo(); };
+    undoButton.onClick = [this] { audioProcessor.getUndoManager().undo(); };
+    redoButton.onClick = [this] { audioProcessor.getUndoManager().redo(); };
     undoButton.setColour(juce::ArrowButton::buttonNormal, juce::Colours::darkgrey);
     undoButton.setColour(juce::ArrowButton::buttonOver, juce::Colours::lightslategrey);
     undoButton.setColour(juce::ArrowButton::buttonDown, juce::Colours::wheat);
