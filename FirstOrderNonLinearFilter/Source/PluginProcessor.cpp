@@ -221,7 +221,7 @@ bool FirstOrderNonLinearFilterAudioProcessor::hasEditor() const
 
 juce::AudioProcessorEditor* FirstOrderNonLinearFilterAudioProcessor::createEditor()
 {
-    return new FirstOrderNonLinearFilterAudioProcessorEditor (*this, getUndoManager());
+    return new FirstOrderNonLinearFilterAudioProcessorEditor (*this);
 }
 
 juce::AudioProcessorValueTreeState::ParameterLayout FirstOrderNonLinearFilterAudioProcessor::createParameterLayout()

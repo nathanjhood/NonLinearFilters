@@ -20,7 +20,7 @@ class FirstOrderNonLinearFilterAudioProcessorEditor  : public juce::AudioProcess
 public:
     using APVTS = juce::AudioProcessorValueTreeState;
 
-    FirstOrderNonLinearFilterAudioProcessorEditor (FirstOrderNonLinearFilterAudioProcessor& p, juce::UndoManager& um);
+    FirstOrderNonLinearFilterAudioProcessorEditor (FirstOrderNonLinearFilterAudioProcessor& p);
     ~FirstOrderNonLinearFilterAudioProcessorEditor() override;
 
     //==============================================================================
@@ -32,7 +32,6 @@ private:
     // This reference is provided as a quick way for your editor to
     // access the processor object that created it.
     FirstOrderNonLinearFilterAudioProcessor& audioProcessor;
-    juce::UndoManager& undoManager;
 
     AutoComponent subComponents;
 
