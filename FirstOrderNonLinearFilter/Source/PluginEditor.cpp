@@ -10,13 +10,12 @@
 #include "PluginEditor.h"
 
 //==============================================================================
-FirstOrderNonLinearFilterAudioProcessorEditor::FirstOrderNonLinearFilterAudioProcessorEditor (FirstOrderNonLinearFilterAudioProcessor& p, APVTS& apvts, juce::UndoManager& um)
+FirstOrderNonLinearFilterAudioProcessorEditor::FirstOrderNonLinearFilterAudioProcessorEditor (FirstOrderNonLinearFilterAudioProcessor& p, juce::UndoManager& um)
     :
     juce::AudioProcessorEditor(&p),
     audioProcessor(p),
-    state(apvts),
     undoManager(um),
-    subComponents(p, apvts)
+    subComponents(p, p.getAPVTS())
 {
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.

@@ -17,8 +17,6 @@
               file="Source/Modules/FirstOrderNLfilter.cpp"/>
         <FILE id="uZf2nP" name="FirstOrderNLfilter.h" compile="0" resource="0"
               file="Source/Modules/FirstOrderNLfilter.h"/>
-        <FILE id="BudANv" name="Oversampler.cpp" compile="1" resource="0" file="Source/Modules/Oversampler.cpp"/>
-        <FILE id="aLyLNs" name="Oversampler.h" compile="0" resource="0" file="Source/Modules/Oversampler.h"/>
       </GROUP>
       <FILE id="jf2xph" name="PluginParameters.cpp" compile="1" resource="0"
             file="Source/PluginParameters.cpp"/>

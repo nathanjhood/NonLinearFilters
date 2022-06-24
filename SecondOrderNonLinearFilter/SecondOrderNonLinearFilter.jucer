@@ -3,7 +3,7 @@
 <JUCERPROJECT id="GZUejJ" name="SecondOrderNonLinearFilter" projectType="audioplug"
               useAppConfig="0" addUsingNamespaceToJuceHeader="0" displaySplashScreen="1"
               jucerFormatVersion="1" companyName="StoneyDSP" companyEmail="Nathan@StoneyDSP.com"
-              version="0.0.01" pluginFormats="buildVST3" cppLanguageStandard="latest">
+              version="0.1.01b" pluginFormats="buildVST3" cppLanguageStandard="latest">
   <MAINGROUP id="B5JMqI" name="SecondOrderNonLinearFilter">
     <GROUP id="{8BE3EC25-17AF-57A0-BB04-BBB511719535}" name="Source">
       <FILE id="cHCXuR" name="PluginParameters.cpp" compile="1" resource="0"
