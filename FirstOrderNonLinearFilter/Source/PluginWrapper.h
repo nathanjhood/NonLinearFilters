@@ -22,11 +22,9 @@ template <typename SampleType>
 class ProcessWrapper
 {
 public:
-    using APVTS = juce::AudioProcessorValueTreeState;
-    using ProcessSpec = juce::dsp::ProcessSpec;
     //==========================================================================
     /** Constructor. */
-    ProcessWrapper(FirstOrderNonLinearFilterAudioProcessor& p, APVTS& apvts, ProcessSpec& spec);
+    ProcessWrapper(FirstOrderNonLinearFilterAudioProcessor& p);
 
     //==========================================================================
     /** Initialises the processor. */
@@ -47,8 +45,6 @@ private:
     // This reference is provided as a quick way for the wrapper to
     // access the processor object that created it.
     FirstOrderNonLinearFilterAudioProcessor& audioProcessor;
-    APVTS& state;
-    ProcessSpec& setup;
 
     //==========================================================================
     /** Instantiate objects. */
@@ -64,7 +60,6 @@ private:
     juce::AudioParameterChoice* linearityPtr{ nullptr };
     juce::AudioParameterFloat* outputPtr{ nullptr };
     juce::AudioParameterFloat* mixPtr{ nullptr };
-    juce::AudioParameterBool* bypassPtr{ nullptr };
     juce::AudioParameterFloat* drivePtr{ nullptr };
 
     //==========================================================================
