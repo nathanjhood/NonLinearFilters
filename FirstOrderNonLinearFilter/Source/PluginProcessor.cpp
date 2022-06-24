@@ -16,11 +16,11 @@ FirstOrderNonLinearFilterAudioProcessor::FirstOrderNonLinearFilterAudioProcessor
                        .withOutput ("Output", juce::AudioChannelSet::stereo(), true)
                        ),
     apvts(*this, &undoManager, "Parameters", createParameterLayout()),
-    spec(),
-    parameters(*this, getAPVTS()),
-    processorFloat(*this, getAPVTS(), getSpec()),
-    processorDouble(*this, getAPVTS(), getSpec())
+    parameters(*this),
+    processorFloat(*this),
+    processorDouble(*this)
 {
+    bypassState = dynamic_cast <juce::AudioParameterBool*> (this->getAPVTS().getParameter("bypassID"));
 }
 
 FirstOrderNonLinearFilterAudioProcessor::~FirstOrderNonLinearFilterAudioProcessor()
@@ -135,6 +135,9 @@ void FirstOrderNonLinearFilterAudioProcessor::prepareToPlay (double sampleRate, 
 {
     // Use this method as the place to do any pre-playback
     // initialisation that you need..
+    
+    update();
+
     processorFloat.prepare(getSpec());
     processorDouble.prepare(getSpec());
 }
@@ -166,7 +169,9 @@ bool FirstOrderNonLinearFilterAudioProcessor::isBusesLayoutSupported (const Buse
 
 void FirstOrderNonLinearFilterAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
 {
-    if (bypassState->get() == true)
+    update();
+
+    if (isBypassed() == true)
     {
         processBlockBypassed(buffer, midiMessages);
     }
@@ -181,7 +186,9 @@ void FirstOrderNonLinearFilterAudioProcessor::processBlock(juce::AudioBuffer<flo
 
 void FirstOrderNonLinearFilterAudioProcessor::processBlock(juce::AudioBuffer<double>& buffer, juce::MidiBuffer& midiMessages)
 {
-    if (bypassState->get() == true)
+    update();
+
+    if (isBypassed() == true)
     {
         processBlockBypassed(buffer, midiMessages);
     }
@@ -214,7 +221,7 @@ bool FirstOrderNonLinearFilterAudioProcessor::hasEditor() const
 
 juce::AudioProcessorEditor* FirstOrderNonLinearFilterAudioProcessor::createEditor()
 {
-    return new FirstOrderNonLinearFilterAudioProcessorEditor (*this, getAPVTS(), undoManager);
+    return new FirstOrderNonLinearFilterAudioProcessorEditor (*this, getUndoManager());
 }
 
 juce::AudioProcessorValueTreeState::ParameterLayout FirstOrderNonLinearFilterAudioProcessor::createParameterLayout()
@@ -258,6 +265,13 @@ void FirstOrderNonLinearFilterAudioProcessor::setCurrentProgramStateInformation(
     if (xmlState.get() != nullptr)
         if (xmlState->hasTagName(apvts.state.getType()))
             apvts.replaceState(juce::ValueTree::fromXml(*xmlState));
+}
+
+void FirstOrderNonLinearFilterAudioProcessor::update()
+{
+    spec.sampleRate = getSampleRate();
+    spec.maximumBlockSize = getBlockSize();
+    spec.numChannels = getTotalNumInputChannels();
 }
 
 //==============================================================================
