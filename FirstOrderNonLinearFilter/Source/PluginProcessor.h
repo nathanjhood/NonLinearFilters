@@ -38,10 +38,6 @@ public:
     void prepareToPlay(double sampleRate, int samplesPerBlock) override;
     void releaseResources() override;
 
-    //==========================================================================
-    void numChannelsChanged() override;
-    void numBusesChanged() override;
-    void processorLayoutsChanged() override;
     bool isBusesLayoutSupported(const BusesLayout& layouts) const override;
 
     //==========================================================================
@@ -76,11 +72,17 @@ public:
     void setCurrentProgramStateInformation(const void* data, int sizeInBytes) override;
 
     //==========================================================================
-    /** Audio processor value tree. */
+    /** Undo Manager. */
     juce::UndoManager undoManager;
+    juce::UndoManager& getUndoManager() { return undoManager; };
+
+    //==========================================================================
+    /** Audio processor value tree. */
     APVTS apvts;
     APVTS& getAPVTS() { return apvts; };
     static APVTS::ParameterLayout createParameterLayout();
+
+    void update();
 
     //==========================================================================
     /** Audio processor specs. */
