@@ -11,7 +11,7 @@
 #include "PluginParameters.h"
 #include "PluginProcessor.h"
 
-Parameters::Parameters(FirstOrderNonLinearFilterAudioProcessor& p, APVTS& apvts) : audioProcessor(p), state(apvts)
+Parameters::Parameters(FirstOrderNonLinearFilterAudioProcessor& p) : audioProcessor(p)
 {
 }
 

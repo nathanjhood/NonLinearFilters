@@ -20,11 +20,10 @@ class FirstOrderNonLinearFilterAudioProcessor;
 class Parameters
 {
 public:
-    using APVTS = juce::AudioProcessorValueTreeState;
     using Params = juce::AudioProcessorValueTreeState::ParameterLayout;
     //==========================================================================
     /** Constructor. */
-    Parameters(FirstOrderNonLinearFilterAudioProcessor& p, APVTS& apvts);
+    Parameters(FirstOrderNonLinearFilterAudioProcessor& p);
 
     //==========================================================================
     /** Create Parameter Layout. */
@@ -35,7 +34,6 @@ private:
     // This reference is provided as a quick way for the wrapper to
     // access the processor object that created it.
     FirstOrderNonLinearFilterAudioProcessor& audioProcessor;
-    APVTS& state;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(Parameters)
 };
