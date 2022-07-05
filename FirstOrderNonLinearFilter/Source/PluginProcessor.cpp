@@ -25,6 +25,7 @@ FirstOrderNonLinearFilterAudioProcessor::FirstOrderNonLinearFilterAudioProcessor
 
 FirstOrderNonLinearFilterAudioProcessor::~FirstOrderNonLinearFilterAudioProcessor()
 {
+    
 }
 
 //==============================================================================
