@@ -8,7 +8,7 @@
 
 #pragma once
 
-#include "../JuceLibraryCode/JuceHeader.h"
+#include <JuceHeader.h>
 #include "PluginParameters.h"
 #include "PluginWrapper.h"
 
@@ -82,8 +82,6 @@ public:
     APVTS& getAPVTS() { return apvts; };
     static APVTS::ParameterLayout createParameterLayout();
 
-    void update();
-
     //==========================================================================
     /** Audio processor specs. */
     juce::dsp::ProcessSpec spec;
@@ -103,8 +101,6 @@ private:
 
     //==========================================================================
     /** Init variables. */
-    double currentSampleRate = 0;
-    int blockSize = 0, latencySamples = 0;
     ProcessingPrecision processingPrecision = singlePrecision;
 
     //==============================================================================

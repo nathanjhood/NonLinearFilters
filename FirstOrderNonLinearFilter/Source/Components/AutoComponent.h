@@ -73,13 +73,13 @@ struct ButtonWithAttachment
 class AutoComponent : public juce::Component
 {
 public:
-    //using APVTS = juce::AudioProcessorValueTreeState;
+    using APVTS = juce::AudioProcessorValueTreeState;
     using Lambda = const std::function<void()>;
     using TextFromVal = const std::function<juce::String(double)>;
     using ValFromText = const std::function<double(juce::String)>;
     //==========================================================================
     /** Constructor. */
-    AutoComponent(juce::AudioProcessor& p, /*APVTS& apvts,*/ Lambda& onValueChange = {}, TextFromVal& textFromValue = {}, ValFromText& valueFromText = {});
+    AutoComponent(juce::AudioProcessor& p, APVTS& apvts, Lambda& onValueChange = {}, TextFromVal& textFromValue = {}, ValFromText& valueFromText = {});
     ~AutoComponent();
 
     //==========================================================================

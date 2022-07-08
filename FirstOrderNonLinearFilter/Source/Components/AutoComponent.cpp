@@ -65,10 +65,8 @@ AutoComponentLookAndFeel::~AutoComponentLookAndFeel()
   ==============================================================================
 */
 
-AutoComponent::AutoComponent(juce::AudioProcessor& p, /*APVTS& apvts,*/ Lambda& onValueChange, TextFromVal& textFromValue, ValFromText& valueFromText) : audioProcessor(p)
+AutoComponent::AutoComponent(juce::AudioProcessor& p, APVTS& apvts, Lambda& onValueChange, TextFromVal& textFromValue, ValFromText& valueFromText) : audioProcessor(p)
 {
-    auto apvts = audioProcessor.getAPVTS();
-
     auto addSlider = [=, &apvts](juce::AudioParameterFloat* param)
     {
         SliderWithAttachment* newSlide = new SliderWithAttachment;
@@ -121,7 +119,7 @@ AutoComponent::AutoComponent(juce::AudioProcessor& p, /*APVTS& apvts,*/ Lambda& 
         buttons.add(newButton);
     };
 
-    auto params = audioProcessor. ; //getParameters();
+    auto params = p.getParameters();
 
     for (auto* param : params)
     {
