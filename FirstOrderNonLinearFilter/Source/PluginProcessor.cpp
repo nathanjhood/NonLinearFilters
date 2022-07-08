@@ -18,9 +18,11 @@ FirstOrderNonLinearFilterAudioProcessor::FirstOrderNonLinearFilterAudioProcessor
     apvts(*this, &undoManager, "Parameters", createParameterLayout()),
     parameters(*this),
     processorFloat(*this),
-    processorDouble(*this)
+    processorDouble(*this),
+    bypassState(dynamic_cast<juce::AudioParameterBool*>(apvts.getParameter("bypassID"))),
+    processingPrecision(singlePrecision)
 {
-    bypassState = dynamic_cast <juce::AudioParameterBool*> (this->getAPVTS().getParameter("bypassID"));
+    jassert(bypassState != nullptr);
 }
 
 FirstOrderNonLinearFilterAudioProcessor::~FirstOrderNonLinearFilterAudioProcessor()
@@ -206,14 +208,28 @@ void FirstOrderNonLinearFilterAudioProcessor::processBlock(juce::AudioBuffer<dou
 
 void FirstOrderNonLinearFilterAudioProcessor::processBlockBypassed(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
 {
-    juce::ignoreUnused(buffer);
-    juce::ignoreUnused(midiMessages);
+    midiMessages.clear();
+
+    juce::dsp::AudioBlock<float> block(buffer);
+    juce::dsp::ProcessContextReplacing context(block);
+
+    const auto& inputBlock = context.getInputBlock();
+    auto& outputBlock = context.getOutputBlock();
+
+    outputBlock.copyFrom(inputBlock);
 }
 
 void FirstOrderNonLinearFilterAudioProcessor::processBlockBypassed(juce::AudioBuffer<double>& buffer, juce::MidiBuffer& midiMessages)
 {
-    juce::ignoreUnused(buffer);
-    juce::ignoreUnused(midiMessages);
+    midiMessages.clear();
+
+    juce::dsp::AudioBlock<double> block(buffer);
+    juce::dsp::ProcessContextReplacing context(block);
+
+    const auto& inputBlock = context.getInputBlock();
+    auto& outputBlock = context.getOutputBlock();
+
+    outputBlock.copyFrom(inputBlock);
 }
 
 //==============================================================================
@@ -232,6 +248,8 @@ juce::AudioProcessorValueTreeState::ParameterLayout FirstOrderNonLinearFilterAud
     APVTS::ParameterLayout params;
 
     Parameters::setParameterLayout(params);
+
+    params.add(std::make_unique<juce::AudioParameterBool>("bypassID", "Bypass", false));
 
     return params;
 }
