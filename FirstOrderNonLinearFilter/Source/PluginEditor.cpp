@@ -27,7 +27,7 @@ FirstOrderNonLinearFilterAudioProcessorEditor::FirstOrderNonLinearFilterAudioPro
     undoButton.setColour(juce::ArrowButton::buttonOver, juce::Colours::lightslategrey);
     undoButton.setColour(juce::ArrowButton::buttonDown, juce::Colours::wheat);
     setResizable(true, true);
-    setSize(400, 350);
+    setSize(430, 350);
 
     startTimerHz(60);
 }
