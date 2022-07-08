@@ -13,26 +13,38 @@
 template <typename SampleType>
 FirstOrderNLfilter<SampleType>::FirstOrderNLfilter()
 {
-    reset(static_cast<SampleType>(0.0));
+    reset();
 }
 
 //==============================================================================
 template <typename SampleType>
 void FirstOrderNLfilter<SampleType>::setFrequency(SampleType newFreq)
 {
-    jassert(static_cast<SampleType>(20.0) <= newFreq && newFreq <= static_cast<SampleType>(20000.0));
+    jassert(minFreq <= newFreq && newFreq <= maxFreq);
 
-    hz = static_cast<SampleType>(juce::jlimit(minFreq, maxFreq, newFreq));
-    frq.setTargetValue(hz);
-    coefficients();
+    if (hz != newFreq)
+    {
+        hz = juce::jlimit(minFreq, maxFreq, newFreq);
+
+        omega = (hz * ((pi * two) / static_cast <SampleType>(sampleRate)));
+        cos = (std::cos(omega));
+        sin = (std::sin(omega));
+
+        coefficients();
+    }
 }
 
 template <typename SampleType>
 void FirstOrderNLfilter<SampleType>::setGain(SampleType newGain)
 {
-    g = static_cast<SampleType>(newGain);
-    lev.setTargetValue(g);
-    coefficients();
+    if (g != newGain)
+    {
+        g = newGain;
+        
+        a = juce::Decibels::decibelsToGain(g * 0.5);
+
+        coefficients();
+    }
 }
 
 template <typename SampleType>
@@ -41,7 +53,7 @@ void FirstOrderNLfilter<SampleType>::setFilterType(filterType newFiltType)
     if (filtType != newFiltType)
     {
         filtType = newFiltType;
-        reset(static_cast<SampleType>(0.0));
+        reset();
         coefficients();
     }
 }
@@ -52,34 +64,9 @@ void FirstOrderNLfilter<SampleType>::setSaturationType(satType newTransformType)
     if (saturationType != newTransformType)
     {
         saturationType = newTransformType;
-        reset(static_cast<SampleType>(0.0));
+        reset();
         coefficients();
     }
-}
-
-//==============================================================================
-template <typename SampleType>
-void FirstOrderNLfilter<SampleType>::setRampDurationSeconds(double newDurationSeconds) noexcept
-{
-    if (rampDurationSeconds != newDurationSeconds)
-    {
-        rampDurationSeconds = newDurationSeconds;
-        reset(static_cast<SampleType>(0.0));
-    }
-}
-
-template <typename SampleType>
-double FirstOrderNLfilter<SampleType>::getRampDurationSeconds() const noexcept
-{
-    return rampDurationSeconds;
-}
-
-template <typename SampleType>
-bool FirstOrderNLfilter<SampleType>::isSmoothing() const noexcept
-{
-    bool smoothersActive = frq.isSmoothing() || lev.isSmoothing();
-
-    return smoothersActive;
 }
 
 //==============================================================================
@@ -95,13 +82,13 @@ void FirstOrderNLfilter<SampleType>::prepare(juce::dsp::ProcessSpec& spec)
     Xn_1.resize(spec.numChannels);
     Yn_1.resize(spec.numChannels);
 
-    reset(static_cast<SampleType>(0.0));
+    reset();
 
-    minFreq = static_cast <SampleType>(sampleRate) / static_cast <SampleType>(24576.0);
-    maxFreq = static_cast <SampleType>(sampleRate) / static_cast <SampleType>(2.125);
+    minFreq = static_cast <SampleType> (sampleRate / 24576.0);
+    maxFreq = static_cast <SampleType> (sampleRate / 2.125);
 
-    jassert(static_cast <SampleType>(20.0) >= minFreq && minFreq <= static_cast <SampleType>(20000.0));
-    jassert(static_cast <SampleType>(20.0) <= maxFreq && maxFreq >= static_cast <SampleType>(20000.0));
+    jassert(static_cast <SampleType> (20.0) >= minFreq && minFreq <= static_cast <SampleType> (20000.0));
+    jassert(static_cast <SampleType> (20.0) <= maxFreq && maxFreq >= static_cast <SampleType> (20000.0));
 
     setFrequency(hz);
     setGain(g);
@@ -114,11 +101,6 @@ void FirstOrderNLfilter<SampleType>::reset(SampleType initialValue)
 {
     for (auto v : { &Wn_1, &Xn_1, &Yn_1, })
         std::fill(v->begin(), v->end(), initialValue);
-
-    frq.reset(sampleRate, rampDurationSeconds);
-    lev.reset(sampleRate, rampDurationSeconds);
-
-    coefficients();
 }
 
 template <typename SampleType>
@@ -152,29 +134,15 @@ SampleType FirstOrderNLfilter<SampleType>::processSample(int channel, SampleType
     return inputValue;
 }
 
-//template <typename SampleType>
-//SampleType FirstOrderNLfilter<SampleType>::directFormITransposedDecramped???(int channel, SampleType inputValue)
-//{
-//    auto& Wn1 = Wn_1[(size_t)channel];
-//
-//    SampleType Xn = inputValue;
-//
-//    SampleType Wn = (Xn + Wn1);
-//    SampleType Yn = ((Wn * b0) + (Wn * b1));
-//
-//    Wn1 = (Wn * a1);
-//
-//    return Yn;
-//}
-
 template <typename SampleType>
-SampleType FirstOrderNLfilter<SampleType>::linear(int channel, SampleType inputValue)
+SampleType FirstOrderNLfilter<SampleType>::linear(int channel, SampleType inputSample)
 {
     auto& Xn1 = Xn_1[(size_t)channel];
 
-    SampleType Xn = inputValue;
+    auto& Xn = inputSample;
+    auto& Yn = outputSample;
 
-    SampleType Yn = ((Xn * b0) + Xn1);
+    Yn = ((Xn * b0) + Xn1);
 
     Xn1 = ((Xn * b1) + (Yn * a1));
 
@@ -182,13 +150,14 @@ SampleType FirstOrderNLfilter<SampleType>::linear(int channel, SampleType inputV
 }
 
 template <typename SampleType>
-SampleType FirstOrderNLfilter<SampleType>::nonlinear1(int channel, SampleType inputValue)
+SampleType FirstOrderNLfilter<SampleType>::nonlinear1(int channel, SampleType inputSample)
 {
     auto& Xn1 = Xn_1[(size_t)channel];
 
-    SampleType Xn = inputValue;
+    auto& Xn = inputSample;
+    auto& Yn = outputSample;
 
-    SampleType Yn = ((Xn * b0) + Xn1);
+    Yn = ((Xn * b0) + Xn1);
 
     Xn1 = std::tanh((Xn * b1) + (Yn * a1));
 
@@ -196,13 +165,14 @@ SampleType FirstOrderNLfilter<SampleType>::nonlinear1(int channel, SampleType in
 }
 
 template <typename SampleType>
-SampleType FirstOrderNLfilter<SampleType>::nonlinear2(int channel, SampleType inputValue)
+SampleType FirstOrderNLfilter<SampleType>::nonlinear2(int channel, SampleType inputSample)
 {
     auto& Xn1 = Xn_1[(size_t)channel];
 
-    SampleType Xn = inputValue;
+    auto& Xn = inputSample;
+    auto& Yn = outputSample;
 
-    SampleType Yn = std::tanh((Xn * b0) + Xn1);
+    Yn = std::tanh((Xn * b0) + Xn1);
 
     Xn1 = ((Xn * b1) + ((Yn) * a1));
 
@@ -210,13 +180,14 @@ SampleType FirstOrderNLfilter<SampleType>::nonlinear2(int channel, SampleType in
 }
 
 template <typename SampleType>
-SampleType FirstOrderNLfilter<SampleType>::nonlinear3(int channel, SampleType inputValue)
+SampleType FirstOrderNLfilter<SampleType>::nonlinear3(int channel, SampleType inputSample)
 {
     auto& Xn1 = Xn_1[(size_t)channel];
 
-    SampleType Xn = inputValue;
+    auto& Xn = inputSample;
+    auto& Yn = outputSample;
 
-    SampleType Yn = std::tanh((Xn * b0) + Xn1);
+    Yn = std::tanh((Xn * b0) + Xn1);
 
     Xn1 = std::tanh((Xn * b1) + (Yn * a1));
 
@@ -224,13 +195,14 @@ SampleType FirstOrderNLfilter<SampleType>::nonlinear3(int channel, SampleType in
 }
 
 template <typename SampleType>
-SampleType FirstOrderNLfilter<SampleType>::nonlinear4(int channel, SampleType inputValue)
+SampleType FirstOrderNLfilter<SampleType>::nonlinear4(int channel, SampleType inputSample)
 {
     auto& Xn1 = Xn_1[(size_t)channel];
 
-    SampleType Xn = std::sin(inputValue);
+    auto& Xn = std::sin(inputSample);
+    auto& Yn = outputSample;
 
-    SampleType Yn = ((Xn * b0) + Xn1);
+    Yn = ((Xn * b0) + Xn1);
 
     Xn1 = ((Xn * b1) + (Yn * a1));
 
@@ -240,14 +212,6 @@ SampleType FirstOrderNLfilter<SampleType>::nonlinear4(int channel, SampleType in
 template <typename SampleType>
 void FirstOrderNLfilter<SampleType>::coefficients()
 {
-    SampleType omega = static_cast <SampleType>(frq.getNextValue() * ((pi * two) / sampleRate));
-    SampleType a = static_cast <SampleType>(juce::Decibels::decibelsToGain(static_cast<SampleType>(lev.getNextValue() * static_cast <SampleType>(0.5))));
-
-    SampleType b_0 = one;
-    SampleType b_1 = zero;
-    SampleType a_0 = one;
-    SampleType a_1 = zero;
-
     switch (filtType)
     {
 
@@ -321,10 +285,10 @@ void FirstOrderNLfilter<SampleType>::coefficients()
         break;
     }
 
-    a0 = static_cast <SampleType>(one / a_0);
-    a1 = static_cast <SampleType>((a_1 * a0) * minusOne);
-    b0 = static_cast <SampleType>(b_0 * a0);
-    b1 = static_cast <SampleType>(b_1 * a0);
+    a0 = (one / a_0);
+    a1 = ((-a_1) * a0);
+    b0 = (b_0 * a0);
+    b1 = (b_1 * a0);
 }
 
 template <typename SampleType>
