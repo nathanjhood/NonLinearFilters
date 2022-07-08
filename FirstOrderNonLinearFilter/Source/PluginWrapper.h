@@ -13,7 +13,8 @@
 #ifndef PLUGINWRAPPER_H_INCLUDED
 #define PLUGINWRAPPER_H_INCLUDED
 
-#include "../JuceLibraryCode/JuceHeader.h"
+#include <JuceHeader.h>
+
 #include "Modules/FirstOrderNLFilter.h"
 
 class FirstOrderNonLinearFilterAudioProcessor;
@@ -22,6 +23,8 @@ template <typename SampleType>
 class ProcessWrapper
 {
 public:
+    using APVTS = juce::AudioProcessorValueTreeState;
+    using Spec = juce::dsp::ProcessSpec;
     //==========================================================================
     /** Constructor. */
     ProcessWrapper(FirstOrderNonLinearFilterAudioProcessor& p);
@@ -45,6 +48,8 @@ private:
     // This reference is provided as a quick way for the wrapper to
     // access the processor object that created it.
     FirstOrderNonLinearFilterAudioProcessor& audioProcessor;
+    APVTS& state;
+    Spec& setup;
 
     //==========================================================================
     /** Instantiate objects. */
