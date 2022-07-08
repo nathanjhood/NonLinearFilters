@@ -43,6 +43,10 @@ public:
     /** Updates the internal state variables of the processor. */
     void update();
 
+    //==========================================================================
+    /** Sets the oversampling factor. */
+    void setOversampling();
+
 private:
     //==========================================================================
     // This reference is provided as a quick way for the wrapper to
@@ -50,6 +54,9 @@ private:
     FirstOrderNonLinearFilterAudioProcessor& audioProcessor;
     APVTS& state;
     Spec& setup;
+
+    //==========================================================================
+    std::unique_ptr<juce::dsp::Oversampling<SampleType>> oversampler[5];
 
     //==========================================================================
     /** Instantiate objects. */
@@ -63,12 +70,14 @@ private:
     juce::AudioParameterFloat* gainPtr{ nullptr };
     juce::AudioParameterChoice* typePtr{ nullptr };
     juce::AudioParameterChoice* linearityPtr{ nullptr };
+    juce::AudioParameterChoice* osPtr;
     juce::AudioParameterFloat* outputPtr{ nullptr };
     juce::AudioParameterFloat* mixPtr{ nullptr };
     juce::AudioParameterFloat* drivePtr{ nullptr };
 
     //==========================================================================
     /** Init variables. */
+    int curOS = 0, prevOS = 0, oversamplingFactor = 1;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ProcessWrapper)
 };
