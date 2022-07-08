@@ -11,7 +11,10 @@
 #include "FirstOrderNLfilter.h"
 
 template <typename SampleType>
-FirstOrderNLfilter<SampleType>::FirstOrderNLfilter()
+FirstOrderNLfilter<SampleType>::FirstOrderNLfilter() 
+    : 
+    b0(one), b1(zero), a0(one), a1(zero),
+    b_0(one), b_1(zero), a_0(one), a_1(zero)
 {
     reset();
 }
@@ -25,11 +28,6 @@ void FirstOrderNLfilter<SampleType>::setFrequency(SampleType newFreq)
     if (hz != newFreq)
     {
         hz = juce::jlimit(minFreq, maxFreq, newFreq);
-
-        omega = (hz * ((pi * two) / static_cast <SampleType>(sampleRate)));
-        cos = (std::cos(omega));
-        sin = (std::sin(omega));
-
         coefficients();
     }
 }
@@ -40,9 +38,6 @@ void FirstOrderNLfilter<SampleType>::setGain(SampleType newGain)
     if (g != newGain)
     {
         g = newGain;
-        
-        a = juce::Decibels::decibelsToGain(g * 0.5);
-
         coefficients();
     }
 }
@@ -157,9 +152,9 @@ SampleType FirstOrderNLfilter<SampleType>::nonlinear1(int channel, SampleType in
     auto& Xn = inputSample;
     auto& Yn = outputSample;
 
-    Yn = ((Xn * b0) + Xn1);
+    Yn = (std::tanh(Xn * b0) + Xn1);
 
-    Xn1 = std::tanh((Xn * b1) + (Yn * a1));
+    Xn1 = ((Xn * b1) + (Yn * a1));
 
     return Yn;
 }
@@ -172,9 +167,9 @@ SampleType FirstOrderNLfilter<SampleType>::nonlinear2(int channel, SampleType in
     auto& Xn = inputSample;
     auto& Yn = outputSample;
 
-    Yn = std::tanh((Xn * b0) + Xn1);
+    Yn = ((Xn * b0) + Xn1);
 
-    Xn1 = ((Xn * b1) + ((Yn) * a1));
+    Xn1 = (std::tanh(Xn * b1) + (Yn * a1));
 
     return Yn;
 }
@@ -187,9 +182,9 @@ SampleType FirstOrderNLfilter<SampleType>::nonlinear3(int channel, SampleType in
     auto& Xn = inputSample;
     auto& Yn = outputSample;
 
-    Yn = std::tanh((Xn * b0) + Xn1);
+    Yn = ((Xn * b0) + Xn1);
 
-    Xn1 = std::tanh((Xn * b1) + (Yn * a1));
+    Xn1 = ((Xn * b1) + std::tanh(Yn * a1));
 
     return Yn;
 }
@@ -199,19 +194,84 @@ SampleType FirstOrderNLfilter<SampleType>::nonlinear4(int channel, SampleType in
 {
     auto& Xn1 = Xn_1[(size_t)channel];
 
-    auto& Xn = std::sin(inputSample);
+    auto& Xn = inputSample;
     auto& Yn = outputSample;
 
-    Yn = ((Xn * b0) + Xn1);
+    Yn = (std::tanh(Xn * b0) + Xn1);
 
-    Xn1 = ((Xn * b1) + (Yn * a1));
+    Xn1 = (std::tanh(Xn * b1) + std::tanh(Yn * a1));
 
-    return std::asin(Yn);
+    return Yn;
 }
+
+//template <typename SampleType>
+//SampleType FirstOrderNLfilter<SampleType>::nonlinear1(int channel, SampleType inputSample)
+//{
+//    auto& Xn1 = Xn_1[(size_t)channel];
+//
+//    auto& Xn = inputSample;
+//    auto& Yn = outputSample;
+//
+//    Yn = ((Xn * b0) + Xn1);
+//
+//    Xn1 = std::tanh((Xn * b1) + (Yn * a1));
+//
+//    return Yn;
+//}
+//
+//template <typename SampleType>
+//SampleType FirstOrderNLfilter<SampleType>::nonlinear2(int channel, SampleType inputSample)
+//{
+//    auto& Xn1 = Xn_1[(size_t)channel];
+//
+//    auto& Xn = inputSample;
+//    auto& Yn = outputSample;
+//
+//    Yn = std::tanh((Xn * b0) + Xn1);
+//
+//    Xn1 = ((Xn * b1) + (Yn * a1));
+//
+//    return Yn;
+//}
+//
+//template <typename SampleType>
+//SampleType FirstOrderNLfilter<SampleType>::nonlinear3(int channel, SampleType inputSample)
+//{
+//    auto& Xn1 = Xn_1[(size_t)channel];
+//
+//    auto& Xn = inputSample;
+//    auto& Yn = outputSample;
+//
+//    Yn = std::tanh((Xn * b0) + Xn1);
+//
+//    Xn1 = std::tanh((Xn * b1) + (Yn * a1));
+//
+//    return Yn;
+//}
+//
+//template <typename SampleType>
+//SampleType FirstOrderNLfilter<SampleType>::nonlinear4(int channel, SampleType inputSample)
+//{
+//    auto& Xn1 = Xn_1[(size_t)channel];
+//
+//    auto& Xn = inputSample;
+//    auto& Yn = outputSample;
+//
+//    Yn = (std::tanh(Xn * b0) + Xn1);
+//
+//    Xn1 = (std::tanh(Xn * b1) + std::tanh(Yn * a1));
+//
+//    return Yn;
+//}
 
 template <typename SampleType>
 void FirstOrderNLfilter<SampleType>::coefficients()
 {
+    omega = (hz * ((pi * two) / static_cast <SampleType>(sampleRate)));
+    a = (std::pow(SampleType(10), (g * SampleType(0.05))));
+    omegaDivA = omega / a;
+    omegaMulA = omega * a;
+
     switch (filtType)
     {
 
@@ -237,6 +297,26 @@ void FirstOrderNLfilter<SampleType>::coefficients()
 
     case filterType::lowShelf:
 
+        b_0 = one + (omegaDivA / (one + (omegaDivA)) * (minusOne + (a * a)));
+        b_1 = (((omegaDivA / (one + omegaDivA)) * (minusOne + (a * a))) - ((one - omegaDivA) / (one + omegaDivA)));
+        a_0 = one;
+        a_1 = minusOne * ((one - omegaDivA) / (one + omegaDivA));
+
+        break;
+
+
+    case filterType::highShelf:
+
+        b_0 = one + ((minusOne + (a * a)) / (one + omegaMulA));
+        b_1 = minusOne * (((one - omegaMulA) / (one + omegaMulA)) + ((minusOne + (a * a)) / (one + omegaMulA)));
+        a_0 = one;
+        a_1 = minusOne * ((one - omegaMulA) / (one + omegaMulA));
+
+        break;
+
+
+    case filterType::lowShelfC: //un-compensated shelf
+
         b_0 = one + ((omega / (one + omega)) * (minusOne + (a * a)));
         b_1 = (((omega / (one + omega)) * (minusOne + (a * a))) - ((one - omega) / (one + omega)));
         a_0 = one;
@@ -245,32 +325,12 @@ void FirstOrderNLfilter<SampleType>::coefficients()
         break;
 
 
-    case filterType::lowShelfC:
-
-        b_0 = one + ((omega / a) / (one + (omega / a)) * (minusOne + (a * a)));
-        b_1 = ((((omega / a) / (one + (omega / a))) * (minusOne + (a * a))) - ((one - (omega / a)) / (one + (omega / a))));
-        a_0 = one;
-        a_1 = minusOne * ((one - (omega / a)) / (one + (omega / a)));
-
-        break;
-
-
-    case filterType::highShelf:
+    case filterType::highShelfC: //un-compensated shelf
 
         b_0 = one + ((minusOne + (a * a)) / (one + omega));
         b_1 = minusOne * (((one - omega) / (one + omega)) + ((minusOne + (a * a)) / (one + omega)));
         a_0 = one;
         a_1 = minusOne * ((one - omega) / (one + omega));
-
-        break;
-
-
-    case filterType::highShelfC:
-
-        b_0 = one + ((minusOne + (a * a)) / (one + (omega * a)));
-        b_1 = minusOne * (((one - (omega * a)) / (one + (omega * a))) + ((minusOne + (a * a)) / (one + (omega * a))));
-        a_0 = one;
-        a_1 = minusOne * ((one - (omega * a)) / (one + (omega * a)));
 
         break;
 

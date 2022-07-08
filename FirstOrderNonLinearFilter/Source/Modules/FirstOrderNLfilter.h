@@ -22,8 +22,8 @@ enum class FilterType
     lowPass = 0,
     highPass = 1,
     lowShelf = 2,
-    lowShelfC = 3,
-    highShelf = 4,
+    highShelf = 3,
+    lowShelfC = 4,
     highShelfC = 5,
 };
 
@@ -36,6 +36,22 @@ enum class SaturationType
     nonlinear4 = 4
 };
 
+template <typename SampleType>
+class GainNl
+{
+public:
+    GainNl()
+    {}
+
+    SampleType& gain(SampleType& inputSample, Coefficient<SampleType>& coeff)
+    {
+        if (isNl == true)
+            return std::tanh(inputSample * coeff);
+        else
+            return inputSample;
+    }
+    bool isNl = false;
+};
 
 template <typename SampleType>
 class FirstOrderNLfilter
@@ -81,7 +97,7 @@ public:
         auto& outputBlock = context.getOutputBlock();
         const auto numChannels = outputBlock.getNumChannels();
         const auto numSamples = outputBlock.getNumSamples();
-        const auto len = inputBlock.getNumSamples();
+
 
         jassert(inputBlock.getNumChannels() == numChannels);
         jassert(inputBlock.getNumSamples() == numSamples);
@@ -146,7 +162,7 @@ private:
     filterType filtType = filterType::lowPass;
     satType saturationType = satType::linear;
 
-    SampleType omega, cos, sin, tan, alpha, a, sqrtA{ 0.0 };
+    SampleType omega, a, omegaDivA, omegaMulA { 0.0 };
 
     //==============================================================================
     /** Initialise constants. */
