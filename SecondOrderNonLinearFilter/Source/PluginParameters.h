@@ -13,7 +13,7 @@
 #ifndef PLUGINPARAMETERS_H_INCLUDED
 #define PLUGINPARAMETERS_H_INCLUDED
 
-#include "../JuceLibraryCode/JuceHeader.h"
+#include <JuceHeader.h>
 
 class SecondOrderNonLinearFilterAudioProcessor;
 
@@ -24,7 +24,7 @@ public:
     using Params = juce::AudioProcessorValueTreeState::ParameterLayout;
     //==========================================================================
     /** Constructor. */
-    Parameters(SecondOrderNonLinearFilterAudioProcessor& p, APVTS& apvts);
+    Parameters(SecondOrderNonLinearFilterAudioProcessor& p);
 
     //==========================================================================
     /** Create Parameter Layout. */
