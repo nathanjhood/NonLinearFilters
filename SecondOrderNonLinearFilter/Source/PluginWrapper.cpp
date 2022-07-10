@@ -12,43 +12,53 @@
 #include "PluginProcessor.h"
 
 template <typename SampleType>
-ProcessWrapper<SampleType>::ProcessWrapper(SecondOrderNonLinearFilterAudioProcessor& p, APVTS& apvts, ProcessSpec& spec)
+ProcessWrapper<SampleType>::ProcessWrapper(SecondOrderNonLinearFilterAudioProcessor& p)
     :
-    audioProcessor(p),
-    state(apvts),
-    setup(spec)
+    audioProcessor (p),
+    state (p.getAPVTS()),
+    setup (p.getSpec()),
+    frequencyPtr ( dynamic_cast <juce::AudioParameterFloat*> (p.getAPVTS().getParameter("frequencyID"))),
+    resonancePtr ( dynamic_cast <juce::AudioParameterFloat*> (p.getAPVTS().getParameter("resonanceID"))),
+    gainPtr ( dynamic_cast <juce::AudioParameterFloat*> (p.getAPVTS().getParameter("gainID"))),
+    typePtr ( dynamic_cast <juce::AudioParameterChoice*> (p.getAPVTS().getParameter("typeID"))),
+    linearityPtr ( dynamic_cast <juce::AudioParameterChoice*> (p.getAPVTS().getParameter("linearityID"))),
+    osPtr ( dynamic_cast <juce::AudioParameterChoice*> (p.getAPVTS().getParameter("osID"))),
+    outputPtr ( dynamic_cast <juce::AudioParameterFloat*> (p.getAPVTS().getParameter("outputID"))),
+    mixPtr ( dynamic_cast <juce::AudioParameterFloat*> (p.getAPVTS().getParameter("mixID"))),
+    bypassPtr ( dynamic_cast <juce::AudioParameterBool*> (p.getAPVTS().getParameter("bypassID"))),
+    drivePtr ( dynamic_cast <juce::AudioParameterFloat*> (p.getAPVTS().getParameter("driveID")))
 {
-    setup.sampleRate = audioProcessor.getSampleRate();
-    setup.maximumBlockSize = audioProcessor.getBlockSize();
-    setup.numChannels = audioProcessor.getTotalNumInputChannels();
-
-    frequencyPtr = dynamic_cast <juce::AudioParameterFloat*> (state.getParameter("frequencyID"));
-    resonancePtr = dynamic_cast <juce::AudioParameterFloat*> (state.getParameter("resonanceID"));
-    gainPtr = dynamic_cast <juce::AudioParameterFloat*> (state.getParameter("gainID"));
-    typePtr = dynamic_cast <juce::AudioParameterChoice*> (state.getParameter("typeID"));
-    outputPtr = dynamic_cast <juce::AudioParameterFloat*> (state.getParameter("outputID"));
-    mixPtr = dynamic_cast <juce::AudioParameterFloat*> (state.getParameter("mixID"));
-    bypassPtr = dynamic_cast <juce::AudioParameterBool*> (state.getParameter("bypassID"));
-    drivePtr = dynamic_cast <juce::AudioParameterFloat*> (state.getParameter("driveID"));
-
     jassert(frequencyPtr != nullptr);
     jassert(resonancePtr != nullptr);
     jassert(gainPtr != nullptr);
     jassert(typePtr != nullptr);
+    jassert(linearityPtr != nullptr);
+    jassert(osPtr != nullptr);
     jassert(outputPtr != nullptr);
     jassert(mixPtr != nullptr);
     jassert(bypassPtr != nullptr);
     jassert(drivePtr != nullptr);
 
-    filter.setTransformType(TransformationType::directFormIItransposed);
+    auto osFilter = juce::dsp::Oversampling<SampleType>::filterHalfBandFIREquiripple;
+
+    for (int i = 0; i < 5; ++i)
+        oversampler[i] = std::make_unique<juce::dsp::Oversampling<SampleType>>
+        (audioProcessor.getTotalNumInputChannels(), i, osFilter, true, false);
+
+    reset();
 }
 
 template <typename SampleType>
 void ProcessWrapper<SampleType>::prepare(juce::dsp::ProcessSpec& spec)
 {
-    spec.sampleRate = audioProcessor.getSampleRate();
-    spec.maximumBlockSize = audioProcessor.getBlockSize();
-    spec.numChannels = audioProcessor.getTotalNumInputChannels();
+    oversamplingFactor = 1 << curOS;
+    prevOS = curOS;
+
+    for (int i = 0; i < 5; ++i)
+        oversampler[i]->initProcessing(spec.maximumBlockSize);
+
+    for (int i = 0; i < 5; ++i)
+        oversampler[i]->numChannels = (size_t)spec.numChannels;
 
     mixer.prepare(spec);
     driveUp.prepare(spec);
@@ -64,11 +74,14 @@ template <typename SampleType>
 void ProcessWrapper<SampleType>::reset()
 {
     mixer.reset();
-    mixer.setWetLatency(static_cast<SampleType>(audioProcessor.getLatencySamples()));
+    //mixer.setWetLatency(static_cast<SampleType>(audioProcessor.getLatencySamples()));
     driveUp.reset();
-    filter.reset(static_cast<SampleType>(0.0));
+    filter.reset();
     driveDn.reset();
     output.reset();
+
+    for (int i = 0; i < 5; ++i)
+        oversampler[i]->reset();
 }
 
 //==============================================================================
@@ -78,14 +91,16 @@ void ProcessWrapper<SampleType>::process(juce::AudioBuffer<SampleType>& buffer, 
     midiMessages.clear();
 
     update();
+    setOversampling();
 
-    auto block = juce::dsp::AudioBlock<SampleType>(buffer);
+    juce::dsp::AudioBlock<SampleType> block(buffer);
+    juce::dsp::AudioBlock<SampleType> osBlock(buffer);
 
     mixer.pushDrySamples(block);
 
-    auto context = juce::dsp::ProcessContextReplacing(block);
+    osBlock = oversampler[curOS]->processSamplesUp(block);
 
-    context.isBypassed = bypassPtr->get();
+    juce::dsp::ProcessContextReplacing context(osBlock);
 
     driveUp.process(context);
 
@@ -95,26 +110,37 @@ void ProcessWrapper<SampleType>::process(juce::AudioBuffer<SampleType>& buffer, 
 
     output.process(context);
 
+    oversampler[curOS]->processSamplesDown(block);
+
     mixer.mixWetSamples(block);
 }
 
 template <typename SampleType>
 void ProcessWrapper<SampleType>::update()
 {
-    setup.sampleRate = audioProcessor.getSampleRate();
-    setup.maximumBlockSize = audioProcessor.getBlockSize();
-    setup.numChannels = audioProcessor.getTotalNumInputChannels();
-
-    audioProcessor.setBypassParameter(bypassPtr);
-
     mixer.setWetMixProportion(mixPtr->get() * 0.01f);
-    driveUp.setGainLinear(juce::Decibels::decibelsToGain(drivePtr->get()));
+    driveUp.setGainDecibels(drivePtr->get());
     filter.setFrequency(frequencyPtr->get());
     filter.setResonance(resonancePtr->get());
     filter.setGain(gainPtr->get());
     filter.setFilterType(static_cast<FilterType>(typePtr->getIndex()));
-    driveDn.setGainLinear(juce::Decibels::decibelsToGain(drivePtr->get() * static_cast<SampleType>(-1.0)));
-    output.setGainLinear(juce::Decibels::decibelsToGain(outputPtr->get()));
+    filter.setSaturationType(static_cast<SaturationType>(linearityPtr->getIndex()));
+    driveDn.setGainDecibels(drivePtr->get() * static_cast<SampleType>(-1.0));
+    output.setGainDecibels(outputPtr->get());
+}
+
+template <typename SampleType>
+void ProcessWrapper<SampleType>::setOversampling()
+{
+    curOS = (int)osPtr->getIndex();
+    if (curOS != prevOS)
+    {
+        oversamplingFactor = 1 << curOS;
+        prevOS = curOS;
+        mixer.reset();
+        filter.reset();
+        output.reset();
+    }
 }
 
 //==============================================================================
