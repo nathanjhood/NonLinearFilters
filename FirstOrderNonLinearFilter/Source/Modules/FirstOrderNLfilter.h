@@ -10,7 +10,9 @@
 
 #pragma once
 
-#include "../JuceLibraryCode/JuceHeader.h"
+#include <JuceHeader.h>
+
+#include "Coefficient.h"
 
 #ifndef FIRSTORDERNLFILTER_H_INCLUDED
 #define FIRSTORDERNLFILTER_H_INCLUDED
@@ -20,8 +22,8 @@ enum class FilterType
     lowPass = 0,
     highPass = 1,
     lowShelf = 2,
-    lowShelfC = 3,
-    highShelf = 4,
+    highShelf = 3,
+    lowShelfC = 4,
     highShelfC = 5,
 };
 
@@ -34,6 +36,22 @@ enum class SaturationType
     nonlinear4 = 4
 };
 
+template <typename SampleType>
+class GainNl
+{
+public:
+    GainNl()
+    {}
+
+    SampleType& gain(SampleType& inputSample, Coefficient<SampleType>& coeff)
+    {
+        if (isNl == true)
+            return std::tanh(inputSample * coeff);
+        else
+            return inputSample;
+    }
+    bool isNl = false;
+};
 
 template <typename SampleType>
 class FirstOrderNLfilter
@@ -59,21 +77,11 @@ public:
     void setSaturationType(satType newTransformType);
 
     //==============================================================================
-    /** Sets the length of the ramp used for smoothing parameter changes. */
-    void setRampDurationSeconds(double newDurationSeconds) noexcept;
-
-    /** Returns the ramp duration in seconds. */
-    double getRampDurationSeconds() const noexcept;
-
-    /** Returns true if the current value is currently being interpolated. */
-    bool isSmoothing() const noexcept;
-
-    //==============================================================================
     /** Initialises the processor. */
     void prepare(juce::dsp::ProcessSpec& spec);
 
     /** Resets the internal state variables of the processor. */
-    void reset(SampleType initialValue);
+    void reset(SampleType initialValue = {0.0});
 
     /** Ensure that the state variables are rounded to zero if the state
     variables are denormals. This is only needed if you are doing sample
@@ -89,16 +97,13 @@ public:
         auto& outputBlock = context.getOutputBlock();
         const auto numChannels = outputBlock.getNumChannels();
         const auto numSamples = outputBlock.getNumSamples();
-        const auto len = inputBlock.getNumSamples();
+
 
         jassert(inputBlock.getNumChannels() == numChannels);
         jassert(inputBlock.getNumSamples() == numSamples);
 
         if (context.isBypassed)
         {
-            frq.skip(static_cast<int> (len));
-            lev.skip(static_cast<int> (len));
-
             outputBlock.copyFrom(inputBlock);
             return;
         }
@@ -121,58 +126,49 @@ public:
     /** Processes one sample at a time on a given channel. */
     SampleType processSample(int channel, SampleType inputValue);
 
-    
-    
-
 private:
 
     //==============================================================================
-    SampleType getb0() { return static_cast<SampleType>(b0); }
-    SampleType getb1() { return static_cast<SampleType>(b1); }
-    SampleType geta0() { return static_cast<SampleType>(a0); }
-    SampleType geta1() { return static_cast<SampleType>(a1); }
+    SampleType getb0() { return b0; }
+    SampleType getb1() { return b1; }
+    SampleType geta0() { return a0; }
+    SampleType geta1() { return a1; }
 
     //==============================================================================
     void coefficients();
 
     //==============================================================================
     SampleType linear(int channel, SampleType inputValue);
-
     SampleType nonlinear1(int channel, SampleType inputValue);
-
     SampleType nonlinear2(int channel, SampleType inputValue);
-
     SampleType nonlinear3(int channel, SampleType inputValue);
-
     SampleType nonlinear4(int channel, SampleType inputValue);
 
     //==============================================================================
     /** Unit-delay objects. */
     std::vector<SampleType> Wn_1, Xn_1, Yn_1;
 
-    //==============================================================================
-    /** Initialise the coefficient gains. */
-    SampleType b0 = 1.0;
-    SampleType b1 = 0.0;
-    SampleType a0 = 1.0;
-    SampleType a1 = 0.0;
+    //==========================================================================
+    /** Coefficient gain */
+    Coefficient<SampleType> b0, b1, a0, a1;
 
-    //==============================================================================
-    /** Parameter Smoothers. */
-    juce::SmoothedValue<SampleType, juce::ValueSmoothingTypes::Multiplicative> frq;
-    juce::SmoothedValue<SampleType, juce::ValueSmoothingTypes::Linear> lev;
+    /** Coefficient calculation */
+    Coefficient<SampleType> b_0, b_1, a_0, a_1;
 
-    //==============================================================================
-    /** Initialise the parameters. */
+    //==========================================================================
+    /** Initialised parameter */
+    SampleType loop = 0.0, outputSample = 0.0;
     SampleType minFreq = 20.0, maxFreq = 20000.0, hz = 1000.0, g = 0.0;
     filterType filtType = filterType::lowPass;
     satType saturationType = satType::linear;
+
+    SampleType omega, a, omegaDivA, omegaMulA { 0.0 };
 
     //==============================================================================
     /** Initialise constants. */
     const SampleType zero = (0.0), one = (1.0), two = (2.0), minusOne = (-1.0), minusTwo = (-2.0);
     const SampleType pi = (juce::MathConstants<SampleType>::pi);
-    double sampleRate = 44100.0, rampDurationSeconds = 0.00005;
+    double sampleRate = 48000.0;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(FirstOrderNLfilter)
 };

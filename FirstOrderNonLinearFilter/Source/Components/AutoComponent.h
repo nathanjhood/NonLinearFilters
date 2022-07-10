@@ -13,6 +13,8 @@
 
 #include "../JuceLibraryCode/JuceHeader.h"
 
+//class FirstOrderNonLinearFilterAudioProcessor;
+
 /*
   ==============================================================================
 
@@ -24,11 +26,10 @@
 class AutoComponentLookAndFeel : public juce::LookAndFeel_V4
 {
 public:
-    using APVTS = juce::AudioProcessorValueTreeState;
-
     //==========================================================================
     /** Constructor. */
     AutoComponentLookAndFeel();
+    ~AutoComponentLookAndFeel();
 };
 
 /*
@@ -79,6 +80,7 @@ public:
     //==========================================================================
     /** Constructor. */
     AutoComponent(juce::AudioProcessor& p, APVTS& apvts, Lambda& onValueChange = {}, TextFromVal& textFromValue = {}, ValFromText& valueFromText = {});
+    ~AutoComponent();
 
     //==========================================================================
     /** Component methods. */
@@ -88,6 +90,8 @@ public:
 private:
     //==========================================================================
     /** Instantiate members. */
+    juce::AudioProcessor& audioProcessor;
+
     //Lambda& lambda;
     AutoComponentLookAndFeel lookAndfeel;
     juce::OwnedArray<SliderWithAttachment> sliders;

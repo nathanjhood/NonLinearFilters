@@ -52,6 +52,11 @@ AutoComponentLookAndFeel::AutoComponentLookAndFeel()
     //setColour(TextButton::textColourOffId, juce::Colours::transparentWhite);
 }
 
+AutoComponentLookAndFeel::~AutoComponentLookAndFeel()
+{
+    
+}
+
 /*
   ==============================================================================
 
@@ -60,7 +65,7 @@ AutoComponentLookAndFeel::AutoComponentLookAndFeel()
   ==============================================================================
 */
 
-AutoComponent::AutoComponent(juce::AudioProcessor& p, APVTS& apvts, Lambda& onValueChange, TextFromVal& textFromValue, ValFromText& valueFromText)
+AutoComponent::AutoComponent(juce::AudioProcessor& p, APVTS& apvts, Lambda& onValueChange, TextFromVal& textFromValue, ValFromText& valueFromText) : audioProcessor(p)
 {
     auto addSlider = [=, &apvts](juce::AudioParameterFloat* param)
     {
@@ -187,6 +192,11 @@ void AutoComponent::paint(juce::Graphics& g)
 
     for (auto* b : buttons)
         applyLookAndFeel(b->button);
+}
+
+AutoComponent::~AutoComponent()
+{
+
 }
 
 //==============================================================================

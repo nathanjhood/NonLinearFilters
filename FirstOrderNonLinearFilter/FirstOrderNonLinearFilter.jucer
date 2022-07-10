@@ -13,6 +13,8 @@
         <FILE id="ryljnD" name="AutoComponent.h" compile="0" resource="0" file="Source/Components/AutoComponent.h"/>
       </GROUP>
       <GROUP id="{64B4936B-5C42-6FC9-8FD2-BDC7E66DFE2E}" name="Modules">
+        <FILE id="Hg5jud" name="Coefficient.cpp" compile="1" resource="0" file="Source/Modules/Coefficient.cpp"/>
+        <FILE id="oKVyMA" name="Coefficient.h" compile="0" resource="0" file="Source/Modules/Coefficient.h"/>
         <FILE id="oyE85v" name="FirstOrderNLfilter.cpp" compile="1" resource="0"
               file="Source/Modules/FirstOrderNLfilter.cpp"/>
         <FILE id="uZf2nP" name="FirstOrderNLfilter.h" compile="0" resource="0"

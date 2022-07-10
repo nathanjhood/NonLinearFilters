@@ -17,9 +17,11 @@ SecondOrderNonLinearFilterAudioProcessor::SecondOrderNonLinearFilterAudioProcess
                        ),
     apvts(*this, &undoManager, "Parameters", createParameterLayout()),
     spec(),
-    parameters(*this, getAPVTS()),
-    processorFloat(*this, getAPVTS(), getSpec()),
-    processorDouble(*this, getAPVTS(), getSpec())
+    parameters(*this),
+    processorFloat(*this),
+    processorDouble(*this),
+    bypassState(dynamic_cast<juce::AudioParameterBool*>(apvts.getParameter("bypassID"))),
+    processingPrecision(singlePrecision)
 {
 }
 
@@ -136,6 +138,15 @@ void SecondOrderNonLinearFilterAudioProcessor::prepareToPlay (double sampleRate,
 {
     // Use this method as the place to do any pre-playback
     // initialisation that you need..
+
+    juce::ignoreUnused(sampleRate, samplesPerBlock);
+
+    processingPrecision = getProcessingPrecision();
+
+    spec.sampleRate = getSampleRate();
+    spec.maximumBlockSize = getBlockSize();
+    spec.numChannels = getTotalNumInputChannels();
+
     processorFloat.prepare(getSpec());
     processorDouble.prepare(getSpec());
 }
@@ -146,30 +157,6 @@ void SecondOrderNonLinearFilterAudioProcessor::releaseResources()
     // spare memory, etc.
     processorFloat.reset();
     processorDouble.reset();
-}
-
-void SecondOrderNonLinearFilterAudioProcessor::numChannelsChanged()
-{
-    processorFloat.reset();
-    processorDouble.reset();
-    processorFloat.prepare(getSpec());
-    processorDouble.prepare(getSpec());
-}
-
-void SecondOrderNonLinearFilterAudioProcessor::numBusesChanged()
-{
-    processorFloat.reset();
-    processorDouble.reset();
-    processorFloat.prepare(getSpec());
-    processorDouble.prepare(getSpec());
-}
-
-void SecondOrderNonLinearFilterAudioProcessor::processorLayoutsChanged()
-{
-    processorFloat.reset();
-    processorDouble.reset();
-    processorFloat.prepare(getSpec());
-    processorDouble.prepare(getSpec());
 }
 
 bool SecondOrderNonLinearFilterAudioProcessor::isBusesLayoutSupported (const BusesLayout& layouts) const
@@ -191,7 +178,7 @@ bool SecondOrderNonLinearFilterAudioProcessor::isBusesLayoutSupported (const Bus
 
 void SecondOrderNonLinearFilterAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
 {
-    if (bypassState->get() == true)
+    if (bypassState->get())
     {
         processBlockBypassed(buffer, midiMessages);
     }
@@ -206,7 +193,7 @@ void SecondOrderNonLinearFilterAudioProcessor::processBlock(juce::AudioBuffer<fl
 
 void SecondOrderNonLinearFilterAudioProcessor::processBlock(juce::AudioBuffer<double>& buffer, juce::MidiBuffer& midiMessages)
 {
-    if (bypassState->get() == true)
+    if (bypassState->get())
     {
         processBlockBypassed(buffer, midiMessages);
     }
@@ -221,14 +208,28 @@ void SecondOrderNonLinearFilterAudioProcessor::processBlock(juce::AudioBuffer<do
 
 void SecondOrderNonLinearFilterAudioProcessor::processBlockBypassed(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
 {
-    juce::ignoreUnused(buffer);
-    juce::ignoreUnused(midiMessages);
+    midiMessages.clear();
+
+    juce::dsp::AudioBlock<float> block(buffer);
+    juce::dsp::ProcessContextReplacing context(block);
+
+    const auto& inputBlock = context.getInputBlock();
+    auto& outputBlock = context.getOutputBlock();
+
+    outputBlock.copyFrom(inputBlock);
 }
 
 void SecondOrderNonLinearFilterAudioProcessor::processBlockBypassed(juce::AudioBuffer<double>& buffer, juce::MidiBuffer& midiMessages)
 {
-    juce::ignoreUnused(buffer);
-    juce::ignoreUnused(midiMessages);
+    midiMessages.clear();
+
+    juce::dsp::AudioBlock<double> block(buffer);
+    juce::dsp::ProcessContextReplacing context(block);
+
+    const auto& inputBlock = context.getInputBlock();
+    auto& outputBlock = context.getOutputBlock();
+
+    outputBlock.copyFrom(inputBlock);
 }
 
 //==============================================================================
@@ -239,12 +240,14 @@ bool SecondOrderNonLinearFilterAudioProcessor::hasEditor() const
 
 juce::AudioProcessorEditor* SecondOrderNonLinearFilterAudioProcessor::createEditor()
 {
-    return new SecondOrderNonLinearFilterAudioProcessorEditor(*this, getAPVTS(), undoManager);
+    return new SecondOrderNonLinearFilterAudioProcessorEditor(*this);
 }
 
 juce::AudioProcessorValueTreeState::ParameterLayout SecondOrderNonLinearFilterAudioProcessor::createParameterLayout()
 {
     APVTS::ParameterLayout params;
+
+    params.add(std::make_unique<juce::AudioParameterBool>("bypassID", "Bypass", false));
 
     Parameters::setParameterLayout(params);
 

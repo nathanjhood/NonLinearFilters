@@ -27,7 +27,7 @@ void Parameters::setParameterLayout(Params& params)
     const auto mixRange = juce::NormalisableRange<float>(00.00f, 100.00f, 0.01f, 1.00f);
     const auto outputRange = juce::NormalisableRange<float>(dBOut, dBMax, 0.01f, 1.00f);
 
-    const auto fString = juce::StringArray({ "LP", "HP", "LS(c)", "LS" , "HS(c)", "HS" });
+    const auto fString = juce::StringArray({ "LP", "HP", "LS", "HS" , "LS(c)", "HS(c)" });
     const auto tString = juce::StringArray({ "Linear", "NL1", "NL2", "NL3", "NL4" });
     const auto osString = juce::StringArray({ "--", "2x", "4x", "8x", "16x" });
 
@@ -83,9 +83,9 @@ void Parameters::setParameterLayout(Params& params)
         //======================================================================
         (std::make_unique<juce::AudioProcessorParameterGroup>("masterID", "1", "seperatorB",
             //==================================================================
+            std::make_unique<juce::AudioParameterChoice>("osID", "Oversampling", osString, 0),
             std::make_unique<juce::AudioParameterFloat>("outputID", "Output", outputRange, 00.00f, outputAttributes),
-            std::make_unique<juce::AudioParameterFloat>("mixID", "Mix", mixRange, 100.00f, mixAttributes),
-            std::make_unique<juce::AudioParameterBool>("bypassID", "Bypass", false)
+            std::make_unique<juce::AudioParameterFloat>("mixID", "Mix", mixRange, 100.00f, mixAttributes)
             //==================================================================
             ));
 }
