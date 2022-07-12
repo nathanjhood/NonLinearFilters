@@ -120,7 +120,7 @@ void ProcessWrapper<SampleType>::update()
 {
     mixer.setWetMixProportion(mixPtr->get() * 0.01f);
     driveUp.setGainDecibels(drivePtr->get());
-    filter.setFrequency(frequencyPtr->get());
+    filter.setFrequency(frequencyPtr->get() / oversamplingFactor);
     filter.setResonance(resonancePtr->get());
     filter.setGain(gainPtr->get());
     filter.setFilterType(static_cast<FilterType>(typePtr->getIndex()));
