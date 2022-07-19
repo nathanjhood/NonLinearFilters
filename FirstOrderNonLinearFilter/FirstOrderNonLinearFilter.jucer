@@ -2,7 +2,7 @@
 
 <JUCERPROJECT id="N7bBzu" name="FirstOrderNonLinearFilter" projectType="audioplug"
               useAppConfig="0" addUsingNamespaceToJuceHeader="0" displaySplashScreen="1"
-              jucerFormatVersion="1" version="0.1.02b" companyName="StoneyDSP"
+              jucerFormatVersion="1" version="1.0.01b" companyName="StoneyDSP"
               companyEmail="nathan@stoneydsp.com" pluginFormats="buildVST3"
               pluginAUMainType="'aufx'" cppLanguageStandard="latest">
   <MAINGROUP id="SHmbVt" name="FirstOrderNonLinearFilter">
