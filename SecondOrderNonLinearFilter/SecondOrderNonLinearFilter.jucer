@@ -14,12 +14,12 @@
             file="Source/PluginWrapper.cpp"/>
       <FILE id="dupXxE" name="PluginWrapper.h" compile="0" resource="0" file="Source/PluginWrapper.h"/>
       <GROUP id="{E6282E5F-15C5-C60E-6165-4084CB2F7F66}" name="Modules">
+        <FILE id="dwP4gH" name="Coefficient.cpp" compile="1" resource="0" file="Source/Modules/Coefficient.cpp"/>
+        <FILE id="n2GkMW" name="Coefficient.h" compile="0" resource="0" file="Source/Modules/Coefficient.h"/>
         <FILE id="ssbwzW" name="SecondOrderNLfilter.cpp" compile="1" resource="0"
               file="Source/Modules/SecondOrderNLfilter.cpp"/>
         <FILE id="vRg3JC" name="SecondOrderNLfilter.h" compile="0" resource="0"
               file="Source/Modules/SecondOrderNLfilter.h"/>
-        <FILE id="mByCYc" name="Oversampler.cpp" compile="1" resource="0" file="Source/Modules/Oversampler.cpp"/>
-        <FILE id="cxfWMZ" name="Oversampler.h" compile="0" resource="0" file="Source/Modules/Oversampler.h"/>
       </GROUP>
       <GROUP id="{C3A9472E-32E0-646C-0575-96EE7B3AA976}" name="Components">
         <FILE id="DIyGLn" name="AutoComponent.cpp" compile="1" resource="0"
