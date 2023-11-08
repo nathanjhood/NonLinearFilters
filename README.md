@@ -1,6 +1,6 @@
 # Non-Linear Filters
 
-![FirstOrderNonLinearFilter-MainImage](https://github.com/StoneyDSP/NonLinearFilters/blob/0d1e2eb78f942be89081301d01248a76dd01bcef/FirstOrderNonLinearFilter/Res/FirstOrderNonLinearFilter-MainImage.png)
+![FirstOrderNonLinearFilter-MainImage](https://raw.githubusercontent.com/nathanjhood/NonLinearFilters/main/FirstOrderNonLinearFilter/Res/FirstOrderNonLinearFilter-MainImage.png)
 
 + Initial implementation of non-linear 1st- and 2nd- order filters are up and ready to go...
 + More coming soon!
